@@ -46,7 +46,7 @@ namespace Plurby.Web.Features.Login
             if (string.IsNullOrWhiteSpace(returnUrl) == false)
                 return Redirect(returnUrl);
 
-            return RedirectToAction(MVC.Example.Users.Index());
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -57,7 +57,7 @@ namespace Plurby.Web.Features.Login
                 if (string.IsNullOrWhiteSpace(returnUrl) == false)
                     return Redirect(returnUrl);
 
-                return RedirectToAction(MVC.Example.Users.Index());
+                return RedirectToAction("Index", "Home");
             }
 
             var model = new LoginViewModel
@@ -89,7 +89,7 @@ namespace Plurby.Web.Features.Login
                 }
             }
 
-            return RedirectToAction(MVC.Login.Login());
+            return View(model);
         }
 
         [HttpPost]
@@ -98,7 +98,7 @@ namespace Plurby.Web.Features.Login
             HttpContext.SignOutAsync();
 
             Alerts.AddSuccess(this, "Utente scollegato correttamente");
-            return RedirectToAction(MVC.Login.Login());
+            return RedirectToAction(nameof(Login));
         }
     }
 }

@@ -112,7 +112,6 @@ namespace Plurby.Web
                 // ROUTING PER HUB
                 endpoints.MapHub<PlurbyHub>("/PlurbyHub");
 
-                endpoints.MapAreaControllerRoute("Example", "Example", "Example/{controller=Users}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute("default", "{controller=Login}/{action=Login}");
             });
         }

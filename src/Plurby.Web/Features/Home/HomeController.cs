@@ -1,26 +1,35 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Plurby.Services.Shared;
 using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Plurby.Web.Features.Home
 {
+    [Authorize]
     public partial class HomeController : Controller
     {
-        public HomeController()
+        private readonly SharedService _service;
+
+        public HomeController(SharedService service)
         {
+            _service = service;
         }
 
-        [HttpPost]
-        public virtual IActionResult ChangeLanguageTo(string cultureName)
+        public virtual async Task<IActionResult> Index()
         {
-            Response.Cookies.Append(
-                CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(cultureName)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), Secure = true }    // Secure assicura che il cookie sia inviato solo per connessioni HTTPS
-            );
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var user = await _service.Query(new UserDetailQuery { Id = userId });
 
-            return Redirect(Request.GetTypedHeaders().Referer.ToString());
+            if (user.Role == UserRole.Manager)
+            {
+                return RedirectToAction("Index", "Manager");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Employee");
+            }
         }
     }
 }

@@ -59,6 +59,7 @@ namespace Plurby.Services.Shared
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string NickName { get; set; }
+        public UserRole Role { get; set; }
     }
 
     public class CheckLoginCredentialsQuery
@@ -143,7 +144,8 @@ namespace Plurby.Services.Shared
                     Email = x.Email,
                     FirstName = x.FirstName,
                     LastName = x.LastName,
-                    NickName = x.NickName
+                    NickName = x.NickName,
+                    Role = x.Role
                 })
                 .FirstOrDefaultAsync();
         }
@@ -169,7 +171,8 @@ namespace Plurby.Services.Shared
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                NickName = user.NickName
+                NickName = user.NickName,
+                Role = user.Role
             };
         }
     }
