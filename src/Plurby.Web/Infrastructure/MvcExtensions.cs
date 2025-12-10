@@ -1,9 +1,10 @@
-﻿using System.Globalization;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Globalization;
+using System.Linq;
 
 namespace Plurby.Web.Infrastructure
 {
@@ -33,9 +34,9 @@ namespace Plurby.Web.Infrastructure
         /// <returns></returns>
         public static string ActiveClassIf(this ViewContext context, string areaName, string controllerName, params string[] actionNames)
         {
-            if ((areaName == null || string.Equals(areaName, context.RouteData.Values["Area"]?.ToString(), System.StringComparison.OrdinalIgnoreCase)) &&
-                (controllerName == null || string.Equals(controllerName, context.RouteData.Values["Controller"]?.ToString(), System.StringComparison.OrdinalIgnoreCase)) &&
-                (actionNames == null || actionNames.Any(x => string.Equals(x, context.RouteData.Values["Action"]?.ToString(), System.StringComparison.OrdinalIgnoreCase))))
+            if ((areaName == null || string.Equals(areaName, context.RouteData.Values["Area"]?.ToString(), StringComparison.OrdinalIgnoreCase)) &&
+                (controllerName == null || string.Equals(controllerName, context.RouteData.Values["Controller"]?.ToString(), StringComparison.OrdinalIgnoreCase)) &&
+                (actionNames == null || actionNames.Any(x => string.Equals(x, context.RouteData.Values["Action"]?.ToString(), StringComparison.OrdinalIgnoreCase))))
                 return ACTIVE_CLASS;
             return string.Empty;
         }

@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
+using Plurby.Web.Infrastructure;
 using System.Linq;
 using System.Security.Claims;
-using Plurby.Web.Infrastructure;
 
 namespace Plurby.Web.Areas
 {
@@ -28,30 +27,23 @@ namespace Plurby.Web.Areas
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            try
+            if (context.HttpContext != null && context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
-                if (context.HttpContext != null && context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
+                ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
                 {
-                    ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
-                    {
-                        EmailUtenteCorrente = context.HttpContext.User.Claims.Where(x => x.Type == ClaimTypes.Email).First().Value
-                    };
-                }
-                else
-                {
-                    HttpContext.SignOutAsync();
-                    this.SignOut();
-
-                    context.Result = new RedirectResult(context.HttpContext.Request.GetEncodedUrl());
-                    Alerts.AddError(this, "L'utente non possiede i diritti per visualizzare la risorsa richiesta");
-                }
-
-                base.OnActionExecuting(context);
+                    EmailUtenteCorrente = context.HttpContext.User.Claims.Where(x => x.Type == ClaimTypes.Email).First().Value
+                };
             }
-            catch (Exception)
+            else
             {
-                throw;
+                HttpContext.SignOutAsync();
+                SignOut();
+
+                context.Result = new RedirectResult(context.HttpContext.Request.GetEncodedUrl());
+                Alerts.AddError(this, "L'utente non possiede i diritti per visualizzare la risorsa richiesta");
             }
+
+            base.OnActionExecuting(context);
         }
     }
 }

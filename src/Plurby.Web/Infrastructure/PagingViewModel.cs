@@ -1,12 +1,13 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Plurby.Web.Infrastructure
 {
@@ -42,7 +43,7 @@ namespace Plurby.Web.Infrastructure
         public virtual void SetPagingDefaults()
         {
             PageSize = 25;
-            PageSizes = new int[] { 15, 25, 50, 100 };
+            PageSizes = new[] { 15, 25, 50, 100 };
         }
 
         public int TotalPages()
@@ -171,16 +172,14 @@ namespace Plurby.Web.Infrastructure
             {
                 if (OrderByDescending)
                     return down;
-                else
-                    return up;
+                return up;
             }
-            else
-                return na;
+            return na;
         }
 
-        Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpressionProvider GetModelExpressionProvider(IServiceProvider services)
+        ModelExpressionProvider GetModelExpressionProvider(IServiceProvider services)
         {
-            return services.GetService(typeof(Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpressionProvider)) as Microsoft.AspNetCore.Mvc.ViewFeatures.ModelExpressionProvider;
+            return services.GetService(typeof(ModelExpressionProvider)) as ModelExpressionProvider;
         }
     }
 }

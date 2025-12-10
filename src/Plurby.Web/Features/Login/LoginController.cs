@@ -1,14 +1,14 @@
-using Plurby.Web.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Plurby.Infrastructure;
+using Plurby.Services.Shared;
+using Plurby.Web.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Plurby.Services.Shared;
 using System.Threading.Tasks;
-using Plurby.Infrastructure;
 
 namespace Plurby.Web.Features.Login
 {
@@ -32,7 +32,8 @@ namespace Plurby.Web.Features.Login
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, utente.Id.ToString()),
-                new Claim(ClaimTypes.Email, utente.Email)
+                new Claim(ClaimTypes.Email, utente.Email),
+                new Claim(ClaimTypes.Name, utente.Email)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -43,7 +44,7 @@ namespace Plurby.Web.Features.Login
                 IsPersistent = rememberMe,
             });
 
-            if (string.IsNullOrWhiteSpace(returnUrl) == false)
+            if (!string.IsNullOrWhiteSpace(returnUrl))
                 return Redirect(returnUrl);
 
             return RedirectToAction("Index", "Home");
@@ -54,7 +55,7 @@ namespace Plurby.Web.Features.Login
         {
             if (HttpContext.User != null && HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated)
             {
-                if (string.IsNullOrWhiteSpace(returnUrl) == false)
+                if (!string.IsNullOrWhiteSpace(returnUrl))
                     return Redirect(returnUrl);
 
                 return RedirectToAction("Index", "Home");

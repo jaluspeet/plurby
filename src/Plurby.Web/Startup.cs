@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using Plurby.Services;
 using Plurby.Web.Infrastructure;
 using Plurby.Web.SignalR.Hubs;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 
 namespace Plurby.Web
 {
@@ -112,7 +112,7 @@ namespace Plurby.Web
                 // ROUTING PER HUB
                 endpoints.MapHub<PlurbyHub>("/PlurbyHub");
 
-                endpoints.MapControllerRoute("default", "{controller=Login}/{action=Login}");
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
             });
         }
     }

@@ -1,5 +1,5 @@
-﻿using Plurby.Services.Shared;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Plurby.Services.Shared;
 using Plurby.Web.SignalR;
 
 namespace Plurby.Web

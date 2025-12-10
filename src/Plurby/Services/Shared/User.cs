@@ -37,9 +37,9 @@ namespace Plurby.Services.Shared
             if (string.IsNullOrWhiteSpace(password)) return false;
 
             var sha256 = SHA256.Create();
-            var testPassword = System.Convert.ToBase64String(sha256.ComputeHash(Encoding.ASCII.GetBytes(password)));
+            var testPassword = Convert.ToBase64String(sha256.ComputeHash(Encoding.ASCII.GetBytes(password)));
 
-            return this.Password == testPassword;
+            return Password == testPassword;
         }
     }
 }

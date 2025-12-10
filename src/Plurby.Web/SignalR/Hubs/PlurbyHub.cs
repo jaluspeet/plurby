@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Threading.Tasks;
 
 namespace Plurby.Web.SignalR.Hubs
 {
     public interface IPlurbyClientEvent
     {
-        public System.Threading.Tasks.Task NewMessage(Guid idUser, Guid idMessage);
+        public Task NewMessage(Guid idUser, Guid idMessage);
     }
 
-    [Microsoft.AspNetCore.Authorization.Authorize] // Makes the hub usable only by authenticated users
+    [Authorize] // Makes the hub usable only by authenticated users
     public class PlurbyHub : Hub<IPlurbyClientEvent>
     {
         private readonly IPublishDomainEvents _publisher;
@@ -18,11 +20,11 @@ namespace Plurby.Web.SignalR.Hubs
             _publisher = publisher;
         }
 
-        public async System.Threading.Tasks.Task JoinGroup(Guid idGroup)
+        public async Task JoinGroup(Guid idGroup)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         }
-        public async System.Threading.Tasks.Task LeaveGroup(Guid idGroup)
+        public async Task LeaveGroup(Guid idGroup)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, idGroup.ToString());
         }

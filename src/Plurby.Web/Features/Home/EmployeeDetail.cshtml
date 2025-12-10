@@ -1,0 +1,31 @@
+@model Plurby.Web.Features.Home.EmployeeDetailViewModel
+@{
+    ViewData["Title"] = "Employee History";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>History: @Model.User.FirstName @Model.User.LastName</h1>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Duration (Hours)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in Model.History)
+            {
+                <tr>
+                    <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
+                    <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
+                    <td>@(entry.DurationHours.HasValue ? entry.DurationHours.Value.ToString("F2") : "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

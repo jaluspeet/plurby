@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Plurby.Web.Infrastructure
 {
@@ -72,9 +72,9 @@ namespace Plurby.Web.Infrastructure
             foreach (var item in errorList)
             {
                 if (item.RawValue != null &&
-                    item.RawValue is Newtonsoft.Json.Linq.JContainer)
+                    item.RawValue is JContainer)
                 {
-                    var vettore = ((Newtonsoft.Json.Linq.JContainer)item.RawValue);
+                    var vettore = ((JContainer)item.RawValue);
                     modelState.SetModelValue(item.Key, vettore.Values<string>().ToArray(), item.AttemptedValue);
                 }
                 else
@@ -143,7 +143,7 @@ namespace Plurby.Web.Infrastructure
 
     public static class ModelStateRazorPageExtensions
     {
-        public static string GetModelStateDictionaryToJson(this Microsoft.AspNetCore.Mvc.Razor.RazorPageBase page)
+        public static string GetModelStateDictionaryToJson(this RazorPageBase page)
         {
             var modelstate = new ModelStateDictionary();
 

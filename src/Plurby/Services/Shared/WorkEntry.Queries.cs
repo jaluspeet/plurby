@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Plurby.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +42,7 @@ namespace Plurby.Services.Shared
                     Id = x.Id,
                     StartTime = x.StartTime,
                     EndTime = x.EndTime,
-                    DurationHours = x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime).TotalHours : (double?)null
+                    DurationHours = x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime).TotalHours : null
                 })
                 .ToArrayAsync();
         }

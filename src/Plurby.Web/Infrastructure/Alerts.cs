@@ -3,10 +3,13 @@
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Plurby.Web.Infrastructure
 {
@@ -86,7 +89,7 @@ namespace Plurby.Web.Infrastructure
 
         public void AddAlert(AlertLevelEnum level, string value, bool autoDismiss)
         {
-            List.Add(new Alert()
+            List.Add(new Alert
             {
                 Value = value,
                 AutoDismiss = autoDismiss
@@ -160,26 +163,23 @@ namespace Plurby.Web.Infrastructure
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        public static HtmlString RenderAlertsWithToastify(this Microsoft.AspNetCore.Mvc.Razor.RazorPageBase page)
+        public static HtmlString RenderAlertsWithToastify(this RazorPageBase page)
         {
             var alerts = GetAlerts(page.ViewContext.ViewData);
 
-            if (alerts.Any() == false)
+            if (!alerts.Any())
             {
                 return HtmlString.Empty;
             }
-            else
+            var s = new StringBuilder();
+
+            foreach (var a in alerts)
             {
-                var s = new System.Text.StringBuilder();
-
-                foreach (var a in alerts)
-                {
-                    var t = $@"Toastify({{close: true,gravity:'bottom',position:'left', className:'onit-toastify onit-toastify-{a.Level}',text:'{a.Value}',duration:{a.MillisecondsAutoDismiss}}}).showToast();";
-                    s.AppendLine(t);
-                }
-
-                return new HtmlString(s.ToString());
+                var t = $@"Toastify({{close: true,gravity:'bottom',position:'left', className:'onit-toastify onit-toastify-{a.Level}',text:'{a.Value}',duration:{a.MillisecondsAutoDismiss}}}).showToast();";
+                s.AppendLine(t);
             }
+
+            return new HtmlString(s.ToString());
         }
 
         static IEnumerable<AlertsDto.Alert> GetAlerts(ViewDataDictionary viewData)
@@ -187,12 +187,9 @@ namespace Plurby.Web.Infrastructure
             var alerts = viewData[Alerts.ALERTS_KEY] as AlertsDto;
             if (alerts == null)
             {
-                return System.Array.Empty<AlertsDto.Alert>();
+                return Array.Empty<AlertsDto.Alert>();
             }
-            else
-            {
-                return alerts.List.ToArray();
-            }
+            return alerts.List.ToArray();
         }
     }
 }

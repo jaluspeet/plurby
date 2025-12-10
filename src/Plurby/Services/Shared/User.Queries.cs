@@ -11,6 +11,7 @@ namespace Plurby.Services.Shared
     {
         public Guid IdCurrentUser { get; set; }
         public string Filter { get; set; }
+        public UserRole? Role { get; set; }
     }
 
     public class UsersSelectDTO
@@ -29,6 +30,7 @@ namespace Plurby.Services.Shared
     {
         public Guid IdCurrentUser { get; set; }
         public string Filter { get; set; }
+        public UserRole? Role { get; set; }
 
         public Paging Paging { get; set; }
     }
@@ -68,6 +70,11 @@ namespace Plurby.Services.Shared
         public string Password { get; set; }
     }
 
+    public class UserByEmailQuery
+    {
+        public string Email { get; set; }
+    }
+
     public partial class SharedService
     {
         /// <summary>
@@ -80,9 +87,14 @@ namespace Plurby.Services.Shared
             var queryable = _dbContext.Users
                 .Where(x => x.Id != qry.IdCurrentUser);
 
-            if (string.IsNullOrWhiteSpace(qry.Filter) == false)
+            if (qry.Role.HasValue)
             {
-                queryable = queryable.Where(x => x.Email.Contains(qry.Filter, StringComparison.OrdinalIgnoreCase));
+                queryable = queryable.Where(x => x.Role == qry.Role.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(qry.Filter))
+            {
+                queryable = queryable.Where(x => x.Email.Contains(qry.Filter));
             }
 
             return new UsersSelectDTO
@@ -108,9 +120,14 @@ namespace Plurby.Services.Shared
             var queryable = _dbContext.Users
                 .Where(x => x.Id != qry.IdCurrentUser);
 
-            if (string.IsNullOrWhiteSpace(qry.Filter) == false)
+            if (qry.Role.HasValue)
             {
-                queryable = queryable.Where(x => x.Email.Contains(qry.Filter, StringComparison.OrdinalIgnoreCase));
+                queryable = queryable.Where(x => x.Role == qry.Role.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(qry.Filter))
+            {
+                queryable = queryable.Where(x => x.Email.Contains(qry.Filter));
             }
 
             return new UsersIndexDTO
@@ -162,7 +179,7 @@ namespace Plurby.Services.Shared
                 .Where(x => x.Email == qry.Email)
                 .FirstOrDefaultAsync();
 
-            if (user == null || user.IsMatchWithPassword(qry.Password) == false)
+            if (user == null || !user.IsMatchWithPassword(qry.Password))
                 throw new LoginException("Email o password errate");
 
             return new UserDetailDTO
@@ -174,6 +191,22 @@ namespace Plurby.Services.Shared
                 NickName = user.NickName,
                 Role = user.Role
             };
+        }
+
+        public async Task<UserDetailDTO> Query(UserByEmailQuery qry)
+        {
+            return await _dbContext.Users
+                .Where(x => x.Email == qry.Email)
+                .Select(x => new UserDetailDTO
+                {
+                    Id = x.Id,
+                    Email = x.Email,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    NickName = x.NickName,
+                    Role = x.Role
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

@@ -1,0 +1,81 @@
+@model Plurby.Web.Features.Home.EmployeeDashboardViewModel
+@{
+    ViewData["Title"] = "My Dashboard";
+}
+
+<div class="container mt-4 text-center">
+    <div class="d-flex justify-content-end">
+        <form asp-controller="Login" asp-action="Logout" method="post">
+            <button type="submit" class="btn btn-outline-danger">Logout</button>
+        </form>
+    </div>
+    <div class="mb-5">
+        @if (Model.Status.IsWorking)
+        {
+            <h2 class="mb-3">You are working</h2>
+            <h3 id="timer" class="mb-4 text-primary">00:00:00</h3>
+            <form asp-action="EndWork" method="post">
+                <button type="submit" class="btn btn-danger btn-lg px-5 py-3">END WORK</button>
+            </form>
+        }
+        else
+        {
+            <h2 class="mb-4">Ready to work?</h2>
+            <form asp-action="StartWork" method="post">
+                <button type="submit" class="btn btn-success btn-lg px-5 py-3">START WORK</button>
+            </form>
+        }
+    </div>
+
+    <hr />
+
+    <div class="text-start">
+        <h3>Work History</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Duration (Hours)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.History)
+                {
+                    <tr>
+                        <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
+                        <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
+                        <td>@(entry.DurationHours.HasValue ? entry.DurationHours.Value.ToString("F2") : "-")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.Status.IsWorking && Model.Status.StartTime.HasValue)
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var startTime = new Date('@Model.Status.StartTime.Value.ToString("o")');
+            var timerElement = document.getElementById('timer');
+
+            function updateTimer() {
+                var now = new Date();
+                var diff = now - startTime;
+                
+                var seconds = Math.floor((diff / 1000) % 60);
+                var minutes = Math.floor((diff / (1000 * 60)) % 60);
+                var hours = Math.floor((diff / (1000 * 60 * 60)));
+
+                timerElement.textContent = 
+                    (hours < 10 ? "0" + hours : hours) + ":" + 
+                    (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                    (seconds < 10 ? "0" + seconds : seconds);
+            }
+
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        });
+    </script>
+}

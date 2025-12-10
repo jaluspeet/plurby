@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Threading.Tasks;
+using Microsoft.CSharp.RuntimeBinder;
 using Plurby.Web.SignalR.Hubs;
 using Plurby.Web.SignalR.Hubs.Events;
+using System;
+using System.Threading.Tasks;
 
 namespace Plurby.Web.SignalR
 {
@@ -26,7 +27,7 @@ namespace Plurby.Web.SignalR
             {
                 return ((dynamic)this).When((dynamic)evnt);
             }
-            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+            catch (RuntimeBinderException)
             {
                 return Task.CompletedTask;
             }

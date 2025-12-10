@@ -1,12 +1,14 @@
-﻿@using Plurby.Web
+﻿@using Microsoft.Extensions.Options
+@using Plurby.Web.Areas
 @using Plurby.Web.Infrastructure
-@inject IHtmlLocalizer<Plurby.Web.SharedResource> SharedLocalizer
-@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings
+@using System.Reflection
+@inject IHtmlLocalizer<SharedResource> SharedLocalizer
+@inject IOptions<AppSettings> appSettings
 @{
     Layout = "_LayoutHtml";
-    var version = System.Reflection.Assembly.GetAssembly(typeof(Startup)).GetName().Version;
+    var version = Assembly.GetAssembly(typeof(Startup)).GetName().Version;
 
-    var identitaCorrente = (Plurby.Web.Areas.IdentitaViewModel)ViewData[Plurby.Web.Areas.IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY];
+    var identitaCorrente = (IdentitaViewModel)ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY];
 }
 @section metas{
     @RenderSection("metas", false)

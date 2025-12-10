@@ -34,30 +34,24 @@ namespace Plurby.Infrastructure
         /// <returns></returns>
         public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, Paging paging)
         {
-            if (paging == null || string.IsNullOrWhiteSpace(paging.OrderBy) == true)
+            if (paging == null || string.IsNullOrWhiteSpace(paging.OrderBy))
             {
                 return query;
             }
+            if (paging.OrderByDescending)
+            {
+                query = query.OrderBy(paging.OrderBy + " DESC");
+            }
             else
             {
-                if (paging.OrderByDescending)
-                {
-                    query = query.OrderBy(paging.OrderBy + " DESC");
-                }
-                else
-                {
-                    query = query.OrderBy(paging.OrderBy);
-                }
-
-                if (paging.OneMoreItem == true)
-                {
-                    return query.Skip((paging.Page - 1) * paging.PageSize).Take(paging.PageSize + 1);
-                }
-                else
-                {
-                    return query.Skip((paging.Page - 1) * paging.PageSize).Take(paging.PageSize);
-                }
+                query = query.OrderBy(paging.OrderBy);
             }
+
+            if (paging.OneMoreItem)
+            {
+                return query.Skip((paging.Page - 1) * paging.PageSize).Take(paging.PageSize + 1);
+            }
+            return query.Skip((paging.Page - 1) * paging.PageSize).Take(paging.PageSize);
         }
 
         /// <summary>
@@ -69,21 +63,15 @@ namespace Plurby.Infrastructure
         /// <returns></returns>
         public static IQueryable<T> ApplyOrder<T>(this IQueryable<T> query, Paging paging)
         {
-            if (paging == null || string.IsNullOrWhiteSpace(paging.OrderBy) == true)
+            if (paging == null || string.IsNullOrWhiteSpace(paging.OrderBy))
             {
                 return query;
             }
-            else
+            if (paging.OrderByDescending)
             {
-                if (paging.OrderByDescending)
-                {
-                    return query.OrderBy(paging.OrderBy + " DESC");
-                }
-                else
-                {
-                    return query.OrderBy(paging.OrderBy);
-                }
+                return query.OrderBy(paging.OrderBy + " DESC");
             }
+            return query.OrderBy(paging.OrderBy);
         }
     }
 }

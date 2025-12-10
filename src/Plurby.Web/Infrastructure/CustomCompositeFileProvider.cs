@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Composite;
+using Microsoft.Extensions.Primitives;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.FileProviders.Composite;
-using Microsoft.Extensions.Primitives;
 
 namespace Plurby.Web.Infrastructure
 {
@@ -111,10 +111,7 @@ namespace Plurby.Web.Infrastructure
                 var relative = subpath.Substring(_relativeFolder.Length);
                 return _p.GetDirectoryContents(subpath);
             }
-            else
-            {
-                return _p.GetDirectoryContents(subpath);
-            }
+            return _p.GetDirectoryContents(subpath);
         }
 
         public IFileInfo GetFileInfo(string subpath)
@@ -124,10 +121,7 @@ namespace Plurby.Web.Infrastructure
                 var relative = subpath.Substring(_relativeFolder.Length);
                 return _p.GetFileInfo(relative);
             }
-            else
-            {
-                return _p.GetFileInfo(subpath);
-            }
+            return _p.GetFileInfo(subpath);
         }
 
         public IChangeToken Watch(string filter)
@@ -137,10 +131,7 @@ namespace Plurby.Web.Infrastructure
                 var relative = filter.Substring(_relativeFolder.Length);
                 return _p.Watch(relative);
             }
-            else
-            {
-                return _p.Watch(filter);
-            }
+            return _p.Watch(filter);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Routing;
 using Sg4Mvc.ModelUnbinders;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,15 +15,15 @@ namespace Plurby.Web.Infrastructure
             var dict = new RouteValueDictionary(routeValue);
             foreach (var entry in dict)
             {
-                if (IgnoreProperty(routeValue, entry) == false)
+                if (!IgnoreProperty(routeValue, entry))
                 {
                     var name = entry.Key;
 
-                    if (!(entry.Value is string) && (entry.Value is System.Collections.IEnumerable))
+                    if (!(entry.Value is string) && (entry.Value is IEnumerable))
                     {
                         if (IncludeProperty(routeValue, entry))
                         {
-                            var enumerableValue = (System.Collections.IEnumerable)entry.Value;
+                            var enumerableValue = (IEnumerable)entry.Value;
                             var i = 0;
                             foreach (var enumerableElement in enumerableValue)
                             {
