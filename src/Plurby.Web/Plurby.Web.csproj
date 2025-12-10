@@ -26,6 +26,9 @@
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="Areas\Example\Users\Edit.cshtml" />
 	  <_ContentIncludedByDefault Remove="Areas\Example\Users\Index.cshtml" />
+	  <_ContentIncludedByDefault Remove="Features\Employee\Index.cshtml" />
+	  <_ContentIncludedByDefault Remove="Features\Manager\Detail.cshtml" />
+	  <_ContentIncludedByDefault Remove="Features\Manager\Index.cshtml" />
 	</ItemGroup>
 
 </Project>

@@ -16,7 +16,7 @@ namespace Plurby.Services.Shared
         public Guid Id { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public double? DurationHours { get; set; }
+        public TimeSpan? Duration { get; set; }
     }
 
     public class CurrentWorkStatusQuery
@@ -42,7 +42,7 @@ namespace Plurby.Services.Shared
                     Id = x.Id,
                     StartTime = x.StartTime,
                     EndTime = x.EndTime,
-                    DurationHours = x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime).TotalHours : null
+                    Duration = x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime) : null
                 })
                 .ToArrayAsync();
         }

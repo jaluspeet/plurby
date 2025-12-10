@@ -14,7 +14,7 @@
             <tr>
                 <th>Start Time</th>
                 <th>End Time</th>
-                <th>Duration (Hours)</th>
+                <th>Duration</th>
             </tr>
         </thead>
         <tbody>
@@ -23,7 +23,7 @@
                 <tr>
                     <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
                     <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
-                    <td>@(entry.DurationHours.HasValue ? entry.DurationHours.Value.ToString("F2") : "-")</td>
+                    <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
                 </tr>
             }
         </tbody>
