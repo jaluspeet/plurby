@@ -1,11 +1,48 @@
 @model Plurby.Web.Features.Home.EmployeeDetailViewModel
+@using System.Linq
 @{
     ViewData["Title"] = $"History: {Model.User.FirstName} {Model.User.LastName}";
+    
+    // Group work entries by month
+    var groupedHistory = Model.History
+        .GroupBy(e => new { e.StartTime.Year, e.StartTime.Month })
+        .OrderByDescending(g => g.Key.Year)
+        .ThenByDescending(g => g.Key.Month)
+        .ToList();
+    
+    var currentMonth = DateTime.Now.Year * 100 + DateTime.Now.Month;
+    var selectedMonth = Context.Request.Query["month"].FirstOrDefault();
+    int monthFilter = string.IsNullOrEmpty(selectedMonth) ? currentMonth : int.Parse(selectedMonth);
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>History: @Model.User.FirstName @Model.User.LastName</h1>
+        <div class="d-flex align-items-center">
+            <h1 class="me-3">History: @Model.User.FirstName @Model.User.LastName</h1>
+            <!-- Month Selector -->
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary" id="prevMonth" title="Previous Month">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" id="currentMonthBtn">
+                    @{
+                        var displayDate = new DateTime(monthFilter / 100, monthFilter % 100, 1);
+                    }
+                    @displayDate.ToString("MMMM yyyy")
+                </button>
+                <ul class="dropdown-menu" id="monthDropdown">
+                    @foreach (var group in groupedHistory)
+                    {
+                        var monthValue = group.Key.Year * 100 + group.Key.Month;
+                        var monthDate = new DateTime(group.Key.Year, group.Key.Month, 1);
+                        <li><a class="dropdown-item @(monthValue == monthFilter ? "active" : "")" href="#" data-month="@monthValue">@monthDate.ToString("MMMM yyyy")</a></li>
+                    }
+                </ul>
+                <button type="button" class="btn btn-outline-secondary" id="nextMonth" title="Next Month">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
         <a asp-action="EmployeesManagement" class="btn btn-secondary">Back to Employees</a>
     </div>
 
@@ -40,25 +77,50 @@
         </div>
     </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Duration</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var entry in Model.History)
-            {
-                <tr>
-                    <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
-                    <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
-                    <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <!-- Filtered work entries for selected month -->
+    @{
+        var selectedMonthEntries = Model.History
+            .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
+            .OrderByDescending(e => e.StartTime)
+            .ToList();
+    }
+
+    @if (selectedMonthEntries.Any())
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Work Entries - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in selectedMonthEntries)
+                        {
+                            <tr>
+                                <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
+                                <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
+                                <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            No work entries found for @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
+        </div>
+    }
 </div>
 
 @section Scripts {
@@ -75,6 +137,50 @@
             }
 
             hourlyRateInput.addEventListener('input', calculatePay);
+
+            // Month selector functionality
+            const prevMonthBtn = document.getElementById('prevMonth');
+            const nextMonthBtn = document.getElementById('nextMonth');
+            const monthDropdownItems = document.querySelectorAll('#monthDropdown .dropdown-item');
+            
+            function navigateMonth(direction) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentMonth = parseInt(urlParams.get('month') || '@(DateTime.Now.Year * 100 + DateTime.Now.Month)');
+                
+                let newYear = Math.floor(currentMonth / 100);
+                let newMonth = currentMonth % 100;
+                
+                if (direction === 'prev') {
+                    newMonth--;
+                    if (newMonth < 1) {
+                        newMonth = 12;
+                        newYear--;
+                    }
+                } else {
+                    newMonth++;
+                    if (newMonth > 12) {
+                        newMonth = 1;
+                        newYear++;
+                    }
+                }
+                
+                const newMonthValue = newYear * 100 + newMonth;
+                urlParams.set('month', newMonthValue);
+                window.location.search = urlParams.toString();
+            }
+            
+            prevMonthBtn.addEventListener('click', () => navigateMonth('prev'));
+            nextMonthBtn.addEventListener('click', () => navigateMonth('next'));
+            
+            monthDropdownItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const monthValue = this.getAttribute('data-month');
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.set('month', monthValue);
+                    window.location.search = urlParams.toString();
+                });
+            });
         });
     </script>
 }
