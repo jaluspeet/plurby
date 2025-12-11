@@ -49,12 +49,10 @@ namespace Plurby.Web.Features.Home
             else
             {
                 var status = await _service.Query(new CurrentWorkStatusQuery { UserId = user.Id });
-                var history = await _service.Query(new WorkHistoryQuery { UserId = user.Id });
 
                 var model = new EmployeeDashboardViewModel
                 {
-                    Status = status,
-                    History = history
+                    Status = status
                 };
                 return View("EmployeeDashboard", model);
             }
@@ -113,17 +111,46 @@ namespace Plurby.Web.Features.Home
                 History = history
             });
         }
+
+        public virtual async Task<IActionResult> EmployeeHistory()
+        {
+            var email = User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var user = await _service.Query(new UserByEmailQuery { Email = email });
+            if (user == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var history = await _service.Query(new WorkHistoryQuery { UserId = user.Id });
+
+            var model = new EmployeeHistoryViewModel
+            {
+                History = history
+            };
+            return View(model);
+        }
     }
 
     public class EmployeeDashboardViewModel
     {
         public CurrentWorkStatusDTO Status { get; set; }
-        public IEnumerable<WorkHistoryDTO> History { get; set; }
     }
 
     public class EmployeeDetailViewModel
     {
         public UserDetailDTO User { get; set; }
+        public IEnumerable<WorkHistoryDTO> History { get; set; }
+    }
+
+    public class EmployeeHistoryViewModel
+    {
         public IEnumerable<WorkHistoryDTO> History { get; set; }
     }
 }
