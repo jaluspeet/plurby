@@ -13,6 +13,23 @@
     var currentMonth = DateTime.Now.Year * 100 + DateTime.Now.Month;
     var selectedMonth = Context.Request.Query["month"].FirstOrDefault();
     int monthFilter = string.IsNullOrEmpty(selectedMonth) ? currentMonth : int.Parse(selectedMonth);
+    
+    // Calculate selected month entries and hours
+    var selectedMonthEntries = Model.History
+        .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
+        .OrderByDescending(e => e.StartTime)
+        .ToList();
+    
+    double selectedMonthHours = 0;
+    foreach (var entry in selectedMonthEntries)
+    {
+        if (entry.Duration.HasValue)
+        {
+            selectedMonthHours += entry.Duration.Value.TotalHours;
+        }
+    }
+    
+
 }
 
 <div class="container mt-4">
@@ -48,23 +65,15 @@
 
     <!-- Hours Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">This Week</h5>
-                    <h3 class="text-primary">@Model.WeeklyHours hours</h3>
+                    <h5 class="card-title">Selected Month Hours</h5>
+                    <h3 class="text-success">@Math.Round(selectedMonthHours, 1) hours</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">This Month</h5>
-                    <h3 class="text-success">@Model.MonthlyHours hours</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Monthly Pay Calculator</h5>
@@ -78,12 +87,6 @@
     </div>
 
     <!-- Filtered work entries for selected month -->
-    @{
-        var selectedMonthEntries = Model.History
-            .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
-            .OrderByDescending(e => e.StartTime)
-            .ToList();
-    }
 
     @if (selectedMonthEntries.Any())
     {
@@ -128,7 +131,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const hourlyRateInput = document.getElementById('hourlyRate');
             const monthlyPayElement = document.getElementById('monthlyPay');
-            const monthlyHours = @Model.MonthlyHours;
+            const monthlyHours = @selectedMonthHours;
 
             function calculatePay() {
                 const hourlyRate = parseFloat(hourlyRateInput.value) || 0;
@@ -137,6 +140,9 @@
             }
 
             hourlyRateInput.addEventListener('input', calculatePay);
+            
+            // Initialize with current hourly rate value
+            calculatePay();
 
             // Month selector functionality
             const prevMonthBtn = document.getElementById('prevMonth');

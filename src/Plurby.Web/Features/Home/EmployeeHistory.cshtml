@@ -18,6 +18,12 @@
     var currentMonth = DateTime.Now.Year * 100 + DateTime.Now.Month;
     var selectedMonth = Context.Request.Query["month"].FirstOrDefault();
     int monthFilter = string.IsNullOrEmpty(selectedMonth) ? currentMonth : int.Parse(selectedMonth);
+    
+    // Calculate selected month entries
+    var selectedMonthEntries = Model.History
+        .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
+        .OrderByDescending(e => e.StartTime)
+        .ToList();
 }
 
 <div class="container mt-4">
@@ -52,12 +58,6 @@
     </div>
 
     <!-- Filtered work entries for selected month -->
-    @{
-        var selectedMonthEntries = Model.History
-            .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
-            .OrderByDescending(e => e.StartTime)
-            .ToList();
-    }
 
     @if (selectedMonthEntries.Any())
     {
