@@ -107,11 +107,44 @@ namespace Plurby.Web.Features.Home
             var user = await _service.Query(new UserDetailQuery { Id = id });
             var history = await _service.Query(new WorkHistoryQuery { UserId = id });
 
+            var now = DateTime.Now;
+            var weeklyHours = CalculateHoursForPeriod(history, now.AddDays(-7), now);
+            var monthlyHours = CalculateHoursForPeriod(history, new DateTime(now.Year, now.Month, 1), now);
+
             return View(new EmployeeDetailViewModel
             {
                 User = user,
-                History = history
+                History = history,
+                WeeklyHours = weeklyHours,
+                MonthlyHours = monthlyHours
             });
+        }
+
+        private double CalculateHoursForPeriod(IEnumerable<WorkHistoryDTO> history, DateTime startDate, DateTime endDate)
+        {
+            double totalHours = 0;
+
+            foreach (var entry in history)
+            {
+                if (entry.Duration.HasValue)
+                {
+                    var entryStart = entry.StartTime.ToLocalTime();
+                    var entryEnd = entry.EndTime?.ToLocalTime() ?? entryStart.Add(entry.Duration.Value);
+
+                    // Check if the work entry overlaps with the period
+                    if (entryStart <= endDate && entryEnd >= startDate)
+                    {
+                        // Calculate the overlap duration
+                        var overlapStart = entryStart < startDate ? startDate : entryStart;
+                        var overlapEnd = entryEnd > endDate ? endDate : entryEnd;
+                        var overlapDuration = overlapEnd - overlapStart;
+                        
+                        totalHours += overlapDuration.TotalHours;
+                    }
+                }
+            }
+
+            return totalHours;
         }
 
         public virtual async Task<IActionResult> EmployeeHistory()
