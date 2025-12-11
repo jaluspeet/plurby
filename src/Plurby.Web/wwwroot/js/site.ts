@@ -2,7 +2,7 @@
 
 namespace utilities {
     export async function postJson(url: string, body: any): Promise<Response> {
-        let res = await fetch(url, {
+        return await fetch(url, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -12,8 +12,6 @@ namespace utilities {
             credentials: "same-origin",
             body: JSON.stringify(body)
         });
-
-        return res;
     }
 
     export async function postJsonT<T>(url: string, body: any): Promise<T> {
@@ -22,7 +20,7 @@ namespace utilities {
     }
 
     export async function getJson(url: string): Promise<Response> {
-        let res = await fetch(url, {
+        return await fetch(url, {
             method: "GET",
             headers: {
                 'Accept': 'application/json',
@@ -30,8 +28,6 @@ namespace utilities {
             },
             credentials: "same-origin",
         });
-
-        return res;
     }
 
     export async function getJsonT<T>(url: string): Promise<T> {
@@ -55,8 +51,7 @@ namespace utilities {
      * Naviga un url mantenendo la funzionalità di +ctrl per aprire in una nuova tab
      */
     export function navigateUrlExcludeOnitNotNavigate(url: string) {
-        if (event.target instanceof HTMLButtonElement == false &&
-            event.target instanceof HTMLAnchorElement == false &&
+        if (!(event.target instanceof HTMLButtonElement) && !(event.target instanceof HTMLAnchorElement) &&
             (event.target instanceof HTMLTableCellElement && event.target.hasAttribute('data-onit-not-navigate') == false)
         ) {
             if (window.event && (<KeyboardEvent>window.event).ctrlKey) {

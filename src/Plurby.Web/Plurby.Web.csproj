@@ -29,6 +29,8 @@
 	  <_ContentIncludedByDefault Remove="Features\Employee\Index.cshtml" />
 	  <_ContentIncludedByDefault Remove="Features\Manager\Detail.cshtml" />
 	  <_ContentIncludedByDefault Remove="Features\Manager\Index.cshtml" />
+	  <_ContentIncludedByDefault Remove="wwwroot\images\app-logo.png" />
+	  <_ContentIncludedByDefault Remove="wwwroot\images\company-logo.png" />
 	</ItemGroup>
 
 </Project>

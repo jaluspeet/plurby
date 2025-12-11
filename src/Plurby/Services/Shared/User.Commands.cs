@@ -40,6 +40,7 @@ namespace Plurby.Services.Shared
                 _dbContext.Users.Add(user);
             }
 
+            user.Email = cmd.Email;
             user.FirstName = cmd.FirstName;
             user.LastName = cmd.LastName;
             user.NickName = cmd.NickName;
