@@ -1,10 +1,16 @@
 @model Plurby.Web.Features.Home.EmployeeDashboardViewModel
+@using Plurby.Web.Areas
 @{
-    ViewData["Title"] = "My Dashboard";
+    var identitaCorrente = ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] as IdentitaViewModel;
+    var userName = (identitaCorrente?.FirstName != null && identitaCorrente?.LastName != null) 
+        ? $"{identitaCorrente.FirstName} {identitaCorrente.LastName}" 
+        : "there";
+    ViewData["Title"] = $"{userName}'s Dashboard";
 }
 
 <div class="container mt-4 text-center">
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Welcome back, @userName!</h2>
         <form asp-controller="Login" asp-action="Logout" method="post">
             <button type="submit" class="btn btn-outline-danger">Logout</button>
         </form>

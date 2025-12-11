@@ -46,6 +46,7 @@ namespace Plurby.Services.Shared
             public string Email { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
+            public UserRole Role { get; set; }
             public bool IsWorking { get; set; }
         }
     }
@@ -141,6 +142,7 @@ namespace Plurby.Services.Shared
                         Email = x.Email,
                         FirstName = x.FirstName,
                         LastName = x.LastName,
+                        Role = x.Role,
                         IsWorking = _dbContext.WorkEntries.Any(w => w.UserId == x.Id && w.EndTime == null)
                     })
                     .ToArrayAsync(),

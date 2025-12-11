@@ -1,12 +1,43 @@
 @model Plurby.Web.Features.Home.EmployeeDetailViewModel
 @{
-    ViewData["Title"] = "Employee History";
+    ViewData["Title"] = $"History: {Model.User.FirstName} {Model.User.LastName}";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>History: @Model.User.FirstName @Model.User.LastName</h1>
-        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        <a asp-action="EmployeesManagement" class="btn btn-secondary">Back to Employees</a>
+    </div>
+
+    <!-- Hours Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">This Week</h5>
+                    <h3 class="text-primary">@Model.WeeklyHours hours</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">This Month</h5>
+                    <h3 class="text-success">@Model.MonthlyHours hours</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Monthly Pay Calculator</h5>
+                    <div class="mb-2">
+                        <input type="number" id="hourlyRate" class="form-control" placeholder="Hourly Rate ($)" step="0.01" min="0">
+                    </div>
+                    <h4 class="text-info" id="monthlyPay">$0.00</h4>
+                </div>
+            </div>
+        </div>
     </div>
 
     <table class="table table-striped">
@@ -29,3 +60,21 @@
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hourlyRateInput = document.getElementById('hourlyRate');
+            const monthlyPayElement = document.getElementById('monthlyPay');
+            const monthlyHours = @Model.MonthlyHours;
+
+            function calculatePay() {
+                const hourlyRate = parseFloat(hourlyRateInput.value) || 0;
+                const monthlyPay = hourlyRate * monthlyHours;
+                monthlyPayElement.textContent = '$' + monthlyPay.toFixed(2);
+            }
+
+            hourlyRateInput.addEventListener('input', calculatePay);
+        });
+    </script>
+}

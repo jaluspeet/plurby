@@ -1,4 +1,4 @@
-﻿using Plurby.Web.Infrastructure;
+using Plurby.Web.Infrastructure;
 
 namespace Plurby.Web.Areas
 {
@@ -7,6 +7,10 @@ namespace Plurby.Web.Areas
         public static string VIEWDATA_IDENTITACORRENTE_KEY = "IdentitaUtenteCorrente";
 
         public string EmailUtenteCorrente { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        public string FullName => $"{FirstName} {LastName}";
 
         public string GravatarUrl
         {

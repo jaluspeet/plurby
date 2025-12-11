@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Plurby.Infrastructure;
 using Plurby.Services.Shared;
+using Plurby.Web.Areas;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -43,6 +44,13 @@ namespace Plurby.Web.Features.Home
             else
             {
                 var status = await _service.Query(new CurrentWorkStatusQuery { UserId = user.Id });
+
+                ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+                {
+                    EmailUtenteCorrente = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                };
 
                 var model = new EmployeeDashboardViewModel
                 {
@@ -123,6 +131,13 @@ namespace Plurby.Web.Features.Home
             }
 
             var history = await _service.Query(new WorkHistoryQuery { UserId = user.Id });
+
+            ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+            {
+                EmailUtenteCorrente = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            };
 
             var model = new EmployeeHistoryViewModel
             {
@@ -274,6 +289,8 @@ namespace Plurby.Web.Features.Home
     {
         public UserDetailDTO User { get; set; }
         public IEnumerable<WorkHistoryDTO> History { get; set; }
+        public double WeeklyHours { get; set; }
+        public double MonthlyHours { get; set; }
     }
 
     public class EmployeeHistoryViewModel

@@ -1,11 +1,16 @@
 @model Plurby.Web.Features.Home.EmployeeHistoryViewModel
+@using Plurby.Web.Areas
 @{
-    ViewData["Title"] = "Work History";
+    var identitaCorrente = ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] as IdentitaViewModel;
+    var userName = (identitaCorrente?.FirstName != null && identitaCorrente?.LastName != null) 
+        ? $"{identitaCorrente.FirstName} {identitaCorrente.LastName}" 
+        : "My";
+    ViewData["Title"] = $"Work History of {userName}";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Work History</h2>
+        <h2>@userName's Work History</h2>
         <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
     </div>
     
