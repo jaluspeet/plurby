@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Plurby.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -46,6 +46,7 @@ namespace Plurby.Services.Shared
             public string Email { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
+            public bool IsWorking { get; set; }
         }
     }
 
@@ -139,7 +140,8 @@ namespace Plurby.Services.Shared
                         Id = x.Id,
                         Email = x.Email,
                         FirstName = x.FirstName,
-                        LastName = x.LastName
+                        LastName = x.LastName,
+                        IsWorking = _dbContext.WorkEntries.Any(w => w.UserId == x.Id && w.EndTime == null)
                     })
                     .ToArrayAsync(),
                 Count = await queryable.CountAsync()

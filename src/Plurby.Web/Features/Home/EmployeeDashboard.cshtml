@@ -13,7 +13,10 @@
         @if (Model.Status.IsWorking)
         {
             <h2 class="mb-3">You are working</h2>
-            <h3 id="timer" class="mb-4 text-primary">00:00:00</h3>
+            <div class="mb-4">
+                <h3 id="timer" class="text-primary">00:00:00</h3>
+                <p class="text-muted">Start time: @Model.Status.StartTime.Value.ToLocalTime().ToString("g")</p>
+            </div>
             <form asp-action="EndWork" method="post">
                 <button type="submit" class="btn btn-danger btn-lg px-5 py-3">END WORK</button>
             </form>

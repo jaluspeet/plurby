@@ -16,6 +16,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -25,6 +26,16 @@
                     <tr>
                         <td>@user.FirstName @user.LastName</td>
                         <td>@user.Email</td>
+                        <td>
+                            @if (user.IsWorking)
+                            {
+                                <span class="badge bg-success">Working</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Not Working</span>
+                            }
+                        </td>
                         <td>
                             <a asp-action="EmployeeDetail" asp-route-id="@user.Id" class="btn btn-sm btn-info">
                                 View History
