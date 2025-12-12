@@ -30,35 +30,56 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
             <h2 class="me-3">@userName's Work History</h2>
-            <!-- Month Selector -->
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary" id="prevMonth" title="Previous Month">
-                    <i class="bi bi-chevron-left"></i>
+
+            <!-- Selettore mese moderno con icone e frecce -->
+            <div class="btn-group">
+                <!-- Bottone mese precedente -->
+                <button type="button" class="btn text-white d-flex align-items-center justify-content-center"
+                        id="prevMonth" title="Previous Month"
+                        style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
+                    <i class="bi bi-arrow-left-circle"></i>
                 </button>
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" id="currentMonthBtn">
+
+                <!-- Bottone mese corrente con dropdown -->
+                <button type="button" class="btn text-white dropdown-toggle d-flex align-items-center justify-content-between"
+                        data-bs-toggle="dropdown" id="currentMonthBtn"
+                        style="background-color:#2A4494; font-size:1rem; padding:0.5rem 1rem; min-width:220px;">
+                    <i class="bi bi-calendar3 me-2"></i>
                     @{
                         var displayDate = new DateTime(monthFilter / 100, monthFilter % 100, 1);
                     }
-                    @displayDate.ToString("MMMM yyyy")
+                    <span>@displayDate.ToString("MMMM yyyy")</span>
+                    <i class="bi bi-chevron-down ms-2"></i>
                 </button>
+
+                <!-- Dropdown mesi -->
                 <ul class="dropdown-menu" id="monthDropdown">
                     @foreach (var group in groupedHistory)
                     {
                         var monthValue = group.Key.Year * 100 + group.Key.Month;
                         var monthDate = new DateTime(group.Key.Year, group.Key.Month, 1);
-                        <li><a class="dropdown-item @(monthValue == monthFilter ? "active" : "")" href="#" data-month="@monthValue">@monthDate.ToString("MMMM yyyy")</a></li>
+                        <li>
+                            <a class="dropdown-item @(monthValue == monthFilter ? "active" : "")"
+                               href="#" data-month="@monthValue">
+                                @monthDate.ToString("MMMM yyyy")
+                            </a>
+                        </li>
                     }
                 </ul>
-                <button type="button" class="btn btn-outline-secondary" id="nextMonth" title="Next Month">
-                    <i class="bi bi-chevron-right"></i>
+
+                <!-- Bottone mese successivo -->
+                <button type="button" class="btn text-white d-flex align-items-center justify-content-center"
+                        id="nextMonth" title="Next Month"
+                        style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
+                    <i class="bi bi-arrow-right-circle"></i>
                 </button>
             </div>
         </div>
+
         <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 
     <!-- Filtered work entries for selected month -->
-
     @if (selectedMonthEntries.Any())
     {
         <div class="card">
@@ -146,3 +167,4 @@
         });
     </script>
 }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
