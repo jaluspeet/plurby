@@ -33,18 +33,23 @@
         <div class="d-flex align-items-center">
             <h1 class="me-3">Storico: @Model.User.FirstName @Model.User.LastName</h1>
 
-            <!-- Selettore mese con frecce -->
+            <!-- Selettore mese moderno con icona e freccia -->
             <div class="btn-group">
-                <button type="button" class="btn btn-primary" id="prevMonth" title="Mese precedente">
+                <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
+                        id="prevMonth" title="Mese precedente" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
                     <i class="bi bi-arrow-left-circle"></i>
                 </button>
 
-                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" id="currentMonthBtn">
+                <button type="button" class="btn text-white dropdown-toggle d-flex align-items-center justify-content-between" 
+                        data-bs-toggle="dropdown" id="currentMonthBtn" style="background-color:#2A4494; font-size:1rem; padding:0.5rem 1rem; min-width:220px;">
+                    <i class="bi bi-calendar3 me-2"></i>
                     @{
                         var displayDate = new DateTime(monthFilter / 100, monthFilter % 100, 1);
                     }
-                    @displayDate.ToString("MMMM yyyy")
+                    <span>@displayDate.ToString("MMMM yyyy")</span>
+                    <i class="bi bi-chevron-down ms-2"></i>
                 </button>
+
                 <ul class="dropdown-menu" id="monthDropdown">
                     @foreach (var group in groupedHistory)
                     {
@@ -54,7 +59,8 @@
                     }
                 </ul>
 
-                <button type="button" class="btn btn-primary" id="nextMonth" title="Mese successivo">
+                <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
+                        id="nextMonth" title="Mese successivo" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
                     <i class="bi bi-arrow-right-circle"></i>
                 </button>
             </div>
