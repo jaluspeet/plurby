@@ -4,31 +4,31 @@
     var identitaCorrente = ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] as IdentitaViewModel;
     var userName = (identitaCorrente?.FirstName != null && identitaCorrente?.LastName != null) 
         ? $"{identitaCorrente.FirstName} {identitaCorrente.LastName}" 
-        : "there";
-    ViewData["Title"] = $"{userName}'s Dashboard";
+        : "utente";
+    ViewData["Title"] = $"Dashboard di {userName}";
 }
 
 <div class="container mt-4 text-center">
     <div class="d-flex justify-content-between align-items-center">
-        <h2>Welcome back, @userName!</h2>
+        <h2>Bentornato, @userName!</h2>
     </div>
     <div class="mb-5">
         @if (Model.Status.IsWorking)
         {
-            <h2 class="mb-3">You are working</h2>
+            <h2 class="mb-3">Stai lavorando</h2>
             <div class="mb-4">
                 <h3 id="timer" class="text-primary">00:00:00</h3>
-                <p class="text-muted">Start time: @Model.Status.StartTime.Value.ToLocalTime().ToString("g")</p>
+                <p class="text-muted">Ora di inizio: @Model.Status.StartTime.Value.ToLocalTime().ToString("g")</p>
             </div>
             <form asp-action="EndWork" method="post">
-                <button type="submit" class="btn btn-danger btn-lg px-5 py-3">END WORK</button>
+                <button type="submit" class="btn btn-danger btn-lg px-5 py-3">TERMINA LAVORO</button>
             </form>
         }
         else
         {
-            <h2 class="mb-4">Ready to work?</h2>
+            <h2 class="mb-4">Pronto per iniziare?</h2>
             <form asp-action="StartWork" method="post">
-                <button type="submit" class="btn btn-success btn-lg px-5 py-3">START WORK</button>
+                <button type="submit" class="btn btn-success btn-lg px-5 py-3">INIZIA LAVORO</button>
             </form>
         }
     </div>
@@ -36,7 +36,9 @@
     <hr />
 
     <div class="text-center">
-        <a asp-action="EmployeeHistory" class="btn btn-primary">View Work History</a>
+        <a asp-action="EmployeeHistory" class="btn" style="background-color:#2A4494; color:white;">
+            <i class="bi bi-clock-history me-2"></i> Visualizza Storico Lavoro
+        </a>
     </div>
 </div>
 
