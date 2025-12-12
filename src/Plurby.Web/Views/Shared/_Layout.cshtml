@@ -10,31 +10,95 @@
 
     var identitaCorrente = (IdentitaViewModel)ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY];
 }
+
 @section metas{
     @RenderSection("metas", false)
 }
+
 @section styles{
     @RenderSection("styles", false)
+
+    <!-- CSS per layout e personalizzazioni -->
+    <style>
+        /* Impostazioni per sticky footer */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* altezza minima della pagina */
+        }
+
+        #pageId {
+            flex: 1; /* occupa lo spazio rimanente tra header e footer */
+        }
+
+        /* HEADER personalizzato */
+        .header-custom {
+            background-color: #2A4494 !important;
+        }
+
+        /* FOOTER personalizzato */
+        .footer-custom {
+            background-color: #2A4494 !important;
+        }
+
+        /* Testo bianco */
+        .header-custom .navbar-nav .nav-link,
+        .header-custom .navbar-brand,
+        .footer-custom,
+        .footer-custom a {
+            color: #ffffff !important;
+        }
+
+        /* Hover elegante */
+        .header-custom .nav-link:hover,
+        .footer-custom a:hover {
+            opacity: 0.8;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        /* Tasto logout personalizzato */
+        .logout-btn {
+            background-color: #D5202C !important; /* rosso desiderato */
+            color: #ffffff !important;           /* testo bianco */
+            border-radius: 12px;                 /* bordi stondati */
+            padding: 5px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;                            /* spazio tra icona e testo */
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .logout-btn:hover {
+            opacity: 0.8;
+            text-decoration: none;
+        }
+    </style>
 }
+
 <div id="pageId">
     <div class="sticky-top" id="onit-page-sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark header-custom">
             <div class="container-fluid">
                 <a class="navbar-brand" href="/">
                     @if (identitaCorrente != null)
                     {
                         if (!string.IsNullOrEmpty(identitaCorrente.FirstName) && !string.IsNullOrEmpty(identitaCorrente.LastName))
                         {
-                            <span>Welcome, @identitaCorrente.FirstName @identitaCorrente.LastName!</span>
+                            <span>Benvenutə, @identitaCorrente.FirstName @identitaCorrente.LastName!</span>
                         }
                         else
                         {
-                            <span>Welcome, @(identitaCorrente.EmailUtenteCorrente.Split('@')[0])!</span>
+                            <span>Benvenutə, @(identitaCorrente.EmailUtenteCorrente.Split('@')[0])!</span>
                         }
                     }
                     else
                     {
-                        <span>Plurby</span>
+                        <span>Plurby S.p.A.</span>
                     }
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +113,7 @@
                                     @identitaCorrente.EmailUtenteCorrente
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" role="menu">
-                                    <a class="dropdown-item" href="javascript:void(0)" onclick="javascript: document.getElementById('POST_LogOut').submit()" title="@SharedLocalizer["Chiudi sessione di lavoro"]">
+                                    <a class="dropdown-item logout-btn" href="javascript:void(0)" onclick="javascript: document.getElementById('POST_LogOut').submit()" title="@SharedLocalizer["Chiudi sessione di lavoro"]">
                                         <i class="fa-solid fa-right-from-bracket"></i>&nbsp;@SharedLocalizer["Esci"]
                                     </a>
                                     <form autocomplete="off" method="post" action="@Url.Action(MVC.Login.Logout())" id="POST_LogOut" display="none"></form>
@@ -60,11 +124,20 @@
                 </div>
             </div>
         </nav>
+
         @RenderSection("pageTitle", false)
     </div>
+
     @RenderSection("pageSubtitle", false)
     @RenderBody()
 </div>
+
+<!-- FOOTER sempre in fondo -->
+<footer class="footer-custom py-3 mt-5">
+    <div class="container text-center">
+        <span>© 2025 Plurby — Spitaleri & Dominici</span>
+    </div>
+</footer>
 
 @section scripts{
     <script type="text/javascript">

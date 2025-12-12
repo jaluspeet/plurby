@@ -2,35 +2,116 @@
 @{
     ViewData["Title"] = "Login";
 }
-<div class="container">
-    <form method="post" role="form" autocomplete="off">
-        <input asp-for="ReturnUrl" type="hidden" />
 
-        <div class="form-group">
-            <label asp-for=Email class="onit-label-required"></label>
-            <div class="input-group onit-input-group-union">
-                <input asp-for="Email" class="form-control" type="text" />
+@section styles {
+    <style>
+        /* Sfondo pagina */
+        body {
+            background-color: #2A4494 !important;
+        }
+
+        /* Container principale centrato */
+        .login-wrapper {
+            min-height: 100vh; /* centra verticalmente */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Box del form */
+        .login-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Titoli */
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            color: #000000;
+            margin-bottom: 0.3rem;
+        }
+
+        .login-subtitle {
+            font-size: 1.1rem;
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #2A4494;
+        }
+
+        /* Bottone personalizzato */
+        .btn-login-custom {
+            background-color: #0B6E4F !important;
+            border: none !important;
+            color: #ffffff !important;
+            padding: 0.75rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: 0.2s ease-in-out;
+        }
+
+        .btn-login-custom:hover {
+            opacity: 0.85;
+        }
+
+           /* Colore ON dello switch */
+        .form-check-input:checked {
+            background-color: #FF7700 !important;
+            border-color: #FF7700 !important;
+        }
+
+        /* Colore del pallino quando si muove (accent-color per browser moderni) */
+        .form-check-input {
+            accent-color: #FF7700 !important;
+        }
+        
+    </style>
+}
+
+<div class="login-wrapper">
+    <div class="login-box">
+
+        <!-- Titoli -->
+        <div class="welcome-title">Bentornatə</div>
+        <div class="login-subtitle">Accedi al tuo account</div>
+
+        <form method="post" role="form" autocomplete="off">
+            <input asp-for="ReturnUrl" type="hidden" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="onit-label-required"></label>
+                <div class="input-group onit-input-group-union">
+                    <input asp-for="Email" class="form-control" type="text" placeholder="aaa@example.com" />
+                </div>
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
 
-        <div class="form-group">
-            <label asp-for=Password class="onit-label-required"></label>
-            <div class="input-group onit-input-group-union">
-                <input asp-for="Password" class="form-control" type="password" />
+            <div class="form-group mb-3">
+                <label asp-for="Password" class="onit-label-required"></label>
+                <div class="input-group onit-input-group-union">
+                    <input asp-for="Password" class="form-control" type="password" />
+                </div>
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
 
-        <div class="form-group">
-            <div class="form-check form-switch">
-                <input asp-for="RememberMe" class="form-check-input" role="switch">
-                <label asp-for="RememberMe" class="form-check-label">Rimani Connesso</label>
+            <div class="form-group mb-3">
+                <div class="form-check form-switch">
+                    <input asp-for="RememberMe" class="form-check-input" role="switch" />
+                    <label asp-for="RememberMe" class="form-check-label">Rimani Connesso</label>
+                </div>
             </div>
-        </div>
 
-        <div class="form-group text-center mt-4">
-            <button type="submit" class="btn btn-primary">Accedi</button>
-        </div>
-    </form>
+            <div class="form-group text-center mt-4">
+                <button type="submit" class="btn-login-custom">Accedi</button>
+            </div>
+        </form>
+    </div>
 </div>

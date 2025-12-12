@@ -11905,3 +11905,29 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+
+/* HEADER personalizzato */
+.header-custom {
+    background-color: #2A4494 !important;
+}
+
+/* FOOTER personalizzato */
+.footer-custom {
+    background-color: #2A4494 !important;
+}
+
+/* Testo bianco per leggibilità */
+.header-custom .navbar-nav .nav-link,
+.header-custom .navbar-brand,
+.footer-custom,
+.footer-custom a {
+    color: #ffffff !important;
+}
+
+/* Hover più elegante */
+.header-custom .nav-link:hover,
+.footer-custom a:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
+}
+

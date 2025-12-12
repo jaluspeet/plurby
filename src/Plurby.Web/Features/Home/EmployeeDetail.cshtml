@@ -1,9 +1,8 @@
 @model Plurby.Web.Features.Home.EmployeeDetailViewModel
 @using System.Linq
 @{
-    ViewData["Title"] = $"History: {Model.User.FirstName} {Model.User.LastName}";
+    ViewData["Title"] = $"Storico: {Model.User.FirstName} {Model.User.LastName}";
     
-    // Group work entries by month
     var groupedHistory = Model.History
         .GroupBy(e => new { e.StartTime.Year, e.StartTime.Month })
         .OrderByDescending(g => g.Key.Year)
@@ -14,7 +13,6 @@
     var selectedMonth = Context.Request.Query["month"].FirstOrDefault();
     int monthFilter = string.IsNullOrEmpty(selectedMonth) ? currentMonth : int.Parse(selectedMonth);
     
-    // Calculate selected month entries and hours
     var selectedMonthEntries = Model.History
         .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
         .OrderByDescending(e => e.StartTime)
@@ -28,20 +26,20 @@
             selectedMonthHours += entry.Duration.Value.TotalHours;
         }
     }
-    
-
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <h1 class="me-3">History: @Model.User.FirstName @Model.User.LastName</h1>
-            <!-- Month Selector -->
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary" id="prevMonth" title="Previous Month">
-                    <i class="bi bi-chevron-left"></i>
+            <h1 class="me-3">Storico: @Model.User.FirstName @Model.User.LastName</h1>
+
+            <!-- Selettore mese con frecce -->
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary" id="prevMonth" title="Mese precedente">
+                    <i class="bi bi-arrow-left-circle"></i>
                 </button>
-                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" id="currentMonthBtn">
+
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" id="currentMonthBtn">
                     @{
                         var displayDate = new DateTime(monthFilter / 100, monthFilter % 100, 1);
                     }
@@ -55,52 +53,54 @@
                         <li><a class="dropdown-item @(monthValue == monthFilter ? "active" : "")" href="#" data-month="@monthValue">@monthDate.ToString("MMMM yyyy")</a></li>
                     }
                 </ul>
-                <button type="button" class="btn btn-outline-secondary" id="nextMonth" title="Next Month">
-                    <i class="bi bi-chevron-right"></i>
+
+                <button type="button" class="btn btn-primary" id="nextMonth" title="Mese successivo">
+                    <i class="bi bi-arrow-right-circle"></i>
                 </button>
             </div>
         </div>
-        <a asp-action="EmployeesManagement" class="btn btn-secondary">Back to Employees</a>
+
+        <a asp-action="EmployeesManagement" class="btn btn-secondary">Torna ai dipendenti</a>
     </div>
 
-    <!-- Hours Summary Cards -->
+    <!-- Riepilogo ore e stipendio -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Selected Month Hours</h5>
-                    <h3 class="text-success">@Math.Round(selectedMonthHours, 1) hours</h3>
+            <div class="card text-white" style="background-color:#2A4494; height:150px;">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="card-title">Ore mese selezionato</h5>
+                    <h3 class="text-white">@Math.Round(selectedMonthHours, 1) ore</h3>
                 </div>
             </div>
         </div>
+
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Monthly Pay Calculator</h5>
-                    <div class="mb-2">
-                        <input type="number" id="hourlyRate" class="form-control" placeholder="Hourly Rate ($)" step="0.01" min="0">
+            <div class="card text-white" style="background-color:#2A4494; height:150px;">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="card-title">Calcola stipendio mensile</h5>
+                    <div class="mb-2 w-50">
+                        <input type="number" id="hourlyRate" class="form-control" placeholder="Tariffa oraria (€)" step="0.01" min="0">
                     </div>
-                    <h4 class="text-info" id="monthlyPay">$0.00</h4>
+                    <h4 class="text-white" id="monthlyPay">€0.00</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filtered work entries for selected month -->
-
+    <!-- Tabella entries per mese -->
     @if (selectedMonthEntries.Any())
     {
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">Work Entries - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
+                <h5 class="mb-0">Entries lavoro - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped mb-0">
                     <thead>
                         <tr>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Duration</th>
+                            <th>Ora inizio</th>
+                            <th>Ora fine</th>
+                            <th>Durata</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,7 +121,7 @@
     {
         <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
-            No work entries found for @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
+            Nessuna entry di lavoro trovata per @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
         </div>
     }
 </div>
@@ -136,26 +136,22 @@
             function calculatePay() {
                 const hourlyRate = parseFloat(hourlyRateInput.value) || 0;
                 const monthlyPay = hourlyRate * monthlyHours;
-                monthlyPayElement.textContent = '$' + monthlyPay.toFixed(2);
+                monthlyPayElement.textContent = '€' + monthlyPay.toFixed(2);
             }
-
             hourlyRateInput.addEventListener('input', calculatePay);
-            
-            // Initialize with current hourly rate value
             calculatePay();
 
-            // Month selector functionality
             const prevMonthBtn = document.getElementById('prevMonth');
             const nextMonthBtn = document.getElementById('nextMonth');
             const monthDropdownItems = document.querySelectorAll('#monthDropdown .dropdown-item');
-            
+
             function navigateMonth(direction) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const currentMonth = parseInt(urlParams.get('month') || '@(DateTime.Now.Year * 100 + DateTime.Now.Month)');
-                
+
                 let newYear = Math.floor(currentMonth / 100);
                 let newMonth = currentMonth % 100;
-                
+
                 if (direction === 'prev') {
                     newMonth--;
                     if (newMonth < 1) {
@@ -169,15 +165,15 @@
                         newYear++;
                     }
                 }
-                
+
                 const newMonthValue = newYear * 100 + newMonth;
                 urlParams.set('month', newMonthValue);
                 window.location.search = urlParams.toString();
             }
-            
+
             prevMonthBtn.addEventListener('click', () => navigateMonth('prev'));
             nextMonthBtn.addEventListener('click', () => navigateMonth('next'));
-            
+
             monthDropdownItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
