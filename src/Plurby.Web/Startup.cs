@@ -1,4 +1,4 @@
-﻿//using Plurby.Web.Hubs;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,7 +37,7 @@ namespace Plurby.Web
                 options.UseInMemoryDatabase(databaseName: "Plurby");
             });
 
-            // SERVICES FOR AUTHENTICATION
+
             services.AddSession();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
             {
@@ -48,7 +48,7 @@ namespace Plurby.Web
             var builder = services.AddMvc()
                 .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization(options =>
-                {                        // Enable loading SharedResource for ModelLocalizer
+                {
                     options.DataAnnotationLocalizerProvider = (type, factory) =>
                         factory.Create(typeof(SharedResource));
                 });
@@ -72,31 +72,31 @@ namespace Plurby.Web
                 options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
             });
 
-            // SIGNALR FOR COLLABORATIVE PAGES
+
             services.AddSignalR();
 
-            // CONTAINER FOR ALL EXTRA CUSTOM SERVICES
+
             Container.RegisterTypes(services);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // Configure the HTTP request pipeline.
+
             if (!env.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
 
-                // Https redirection only in production
+
                 app.UseHsts();
                 app.UseHttpsRedirection();
             }
 
-            // Localization support if you want to
+
             app.UseRequestLocalization(SupportedCultures.CultureNames);
 
             app.UseRouting();
 
-            // Adding authentication to pipeline
+
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -109,7 +109,7 @@ namespace Plurby.Web
 
             app.UseEndpoints(endpoints =>
             {
-                // ROUTING PER HUB
+
                 endpoints.MapHub<PlurbyHub>("/PlurbyHub");
 
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
@@ -127,7 +127,7 @@ namespace Plurby.Web
             CultureNames = new[] { "it-it" };
             Cultures = CultureNames.Select(c => new CultureInfo(c)).ToArray();
 
-            //NB: attenzione nel progetto a settare correttamente <NeutralLanguage>it-IT</NeutralLanguage>
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿declare var signalR: any;
+declare var signalR: any;
 
 class SignalRConnectionManager {
     joinGroupMethod: string;
@@ -16,12 +16,12 @@ class SignalRConnectionManager {
             .withAutomaticReconnect({
                 nextRetryDelayInMilliseconds: retryContext => {
                     const maxReconnectionMillisecondsDelay = 60000;
-                    console.log("[" + new Date().toISOString() + "] retryContext.elapsedMilliseconds " + retryContext.elapsedMilliseconds);
+
                     if (retryContext.elapsedMilliseconds < maxReconnectionMillisecondsDelay) {
-                        console.log("[" + new Date().toISOString() + "] SignalR riprovo la connessione tra " + retryContext.elapsedMilliseconds + "ms");
+
                         return retryContext.elapsedMilliseconds;
                     } else {
-                        console.log("[" + new Date().toISOString() + "] SignalR non riprovo, ho superato " + maxReconnectionMillisecondsDelay + "ms di tentativi");
+
                         return null;
                     }
                 }
@@ -35,7 +35,7 @@ class SignalRConnectionManager {
             console.assert(this.connection.state === signalR.HubConnectionState.Reconnecting);
 
             document.getElementById('lostConnection').classList.remove('d-none');
-            console.log("[" + new Date().toISOString() + "] SignalR in riconnessione. " + error + ".");
+
         });
 
         this.connection.onreconnected(async connectionId => {
@@ -47,14 +47,14 @@ class SignalRConnectionManager {
                 await this.connection.invoke(this.joinGroupMethod);
             }
 
-            console.log("[" + new Date().toISOString() + "] SignalR riconnesso");
+
             document.getElementById('lostConnection').classList.add('d-none');
             document.getElementById('lostConnectionManualRetry').classList.add('d-none');
         });
 
         this.connection.onclose(async (error) => {
             console.assert(this.connection.state === signalR.HubConnectionState.Disconnected);
-            console.log("[" + new Date().toISOString() + "] SignalR scollegato definitivamente");
+
             document.getElementById('lostConnection').classList.add('d-none');
             document.getElementById('lostConnectionManualRetry').classList.remove('d-none');
         });
@@ -72,7 +72,7 @@ class SignalRConnectionManager {
     }
 
     async startConnection() {
-        console.log("[" + new Date().toISOString() + "] SignalR in connessione");
+
         try {
             await this.connection.start();
             console.assert(this.connection.state === signalR.HubConnectionState.Connected);
@@ -83,20 +83,19 @@ class SignalRConnectionManager {
                 await this.connection.invoke(this.joinGroupMethod);
             }
 
-            console.log("[" + new Date().toISOString() + "] SignalR connesso");
+
             document.getElementById('lostConnection').classList.add('d-none');
             document.getElementById('lostConnectionManualRetry').classList.add('d-none');
         } catch (err) {
             console.assert(this.connection.state === signalR.HubConnectionState.Disconnected);
 
-            console.log("[" + new Date().toISOString() + "] SignalR erore in connessione " + err);
-            console.log("[" + new Date().toISOString() + "] SignalR riprovo la connessione tra 5000ms");
+
             setTimeout(() => this.startConnection(), 5000);
         }
     };
 
     async stopConnection() {
-        console.log("[" + new Date().toISOString() + "] SignalR in uscita");
+
         try {
 
             if (this.joinGroupParamethers) {
@@ -108,13 +107,13 @@ class SignalRConnectionManager {
             await this.connection.stop();
             console.assert(this.connection.state === signalR.HubConnectionState.Disconnected);
 
-            console.log("[" + new Date().toISOString() + "] SignalR disconnesso");
+
             document.getElementById('lostConnection').classList.remove('d-none');
             document.getElementById('lostConnectionManualRetry').classList.remove('d-none');
         } catch (err) {
             console.assert(this.connection.state !== signalR.HubConnectionState.Disconnected);
 
-            console.log("[" + new Date().toISOString() + "] SignalR erore in disconnessione " + err);
+
         }
     };
 }

@@ -16,7 +16,7 @@ namespace Plurby.Web
                 {
                     webBuilder.ConfigureKestrel(kestrel =>
                     {
-                        kestrel.AddServerHeader = false; // OWASP: Remove Kestrel response header 
+                        kestrel.AddServerHeader = false; 
                     });
 
                     webBuilder.UseStartup<Startup>();
