@@ -39,6 +39,12 @@ namespace Plurby.Web.Features.Home
 
             if (user.Role == UserRole.Manager)
             {
+                ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+                {
+                    EmailUtenteCorrente = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                };
                 return View("ManagerIndex");
             }
             else
@@ -104,6 +110,27 @@ namespace Plurby.Web.Features.Home
 
         public virtual async Task<IActionResult> EmployeeDetail(Guid id)
         {
+            var email = User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var currentUser = await _service.Query(new UserByEmailQuery { Email = email });
+            if (currentUser == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+            {
+                EmailUtenteCorrente = currentUser.Email,
+                FirstName = currentUser.FirstName,
+                LastName = currentUser.LastName
+            };
+
             var user = await _service.Query(new UserDetailQuery { Id = id });
             var history = await _service.Query(new WorkHistoryQuery { UserId = id });
 
@@ -200,6 +227,13 @@ namespace Plurby.Web.Features.Home
                 return RedirectToAction("Login", "Login");
             }
 
+            ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+            {
+                EmailUtenteCorrente = user.Email ?? email,
+                FirstName = user.FirstName ?? "",
+                LastName = user.LastName ?? ""
+            };
+
             return View("ManagerIndex");
         }
 
@@ -218,6 +252,13 @@ namespace Plurby.Web.Features.Home
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return RedirectToAction("Login", "Login");
             }
+
+            ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+            {
+                EmailUtenteCorrente = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            };
 
             var employees = await _service.Query(new UsersIndexQuery
             {
@@ -243,6 +284,13 @@ namespace Plurby.Web.Features.Home
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return RedirectToAction("Login", "Login");
             }
+
+            ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel
+            {
+                EmailUtenteCorrente = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            };
 
             var users = await _service.Query(new UsersIndexQuery
             {

@@ -1,6 +1,2 @@
-﻿@import "site.variables.scss";
-
-// Import bootstrap to be able to customize it with scss variables
+// Import Bootstrap with default styling
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
-
-@import "site.layout.scss";
