@@ -25,38 +25,26 @@
                     <th>Azioni</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var user in Model.Users)
-                {
-                    <tr>
-                        <td>@user.FirstName @user.LastName</td>
-                        <td>@user.Email</td>
-                        <td>@user.Role</td>
-                        <td>
-                            @if (user.IsWorking)
-                            {
-                                <span class="badge bg-success">Attivo</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Non Attivo</span>
-                            }
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-warning"
-                                    onclick="editUser('@user.Id', '@user.FirstName', '@user.LastName', '@user.Email', '@user.Role')">
-                                <i class="bi bi-pencil-square"></i> Modifica
-                            </button>
-
-                            <button type="button" class="btn btn-sm btn-danger"
-                                    onclick="deleteUser('@user.Id', '@user.FirstName @user.LastName')">
-                                <i class="bi bi-trash"></i> Elimina
-                            </button>
-                        </td>
-                    </tr>
-                }
+            <tbody id="usersTableBody">
             </tbody>
         </table>
+    </div>
+
+    <!-- PAGINAZIONE -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div id="pageCounter" class="fw-bold"></div>
+
+        <div>
+            <button id="prevBtn" class="btn btn-link text-decoration-underline"
+                    style="color:#FF8D28; font-weight:bold;">
+                <i class="bi bi-arrow-left"></i> Indietro
+            </button>
+
+            <button id="nextBtn" class="btn"
+                    style="background-color:#0B6E4F; color:white; font-weight:bold;">
+                Avanti <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -103,7 +91,7 @@
                     <div class="mb-3">
                         <label for="createRole" class="form-label">Ruolo</label>
                         <select class="form-control" id="createRole" name="role" required>
-                            <option value="Employee">Dipendente</option>
+                            <option value="Dipendente">Dipendente</option>
                             <option value="Manager">Manager</option>
                         </select>
                     </div>
@@ -148,7 +136,7 @@
                     <div class="mb-3">
                         <label for="editRole" class="form-label">Ruolo</label>
                         <select class="form-control" id="editRole" name="role" required>
-                            <option value="Employee">Dipendente</option>
+                            <option value="Dipendente">Dipendente</option>
                             <option value="Manager">Manager</option>
                         </select>
                     </div>
@@ -197,22 +185,108 @@
 </div>
 
 @section Scripts {
-    <script>
-        function editUser(id, firstName, lastName, email, role) {
-            document.getElementById('editId').value = id;
-            document.getElementById('editFirstName').value = firstName;
-            document.getElementById('editLastName').value = lastName;
-            document.getElementById('editEmail').value = email;
-            document.getElementById('editRole').value = role;
-            new bootstrap.Modal(document.getElementById('editUserModal')).show();
-        }
-        
-        function deleteUser(id, name) {
-            document.getElementById('deleteId').value = id;
-            document.getElementById('deleteUserName').textContent = name;
-            new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
-        }
-    </script>
+<script>
+
+   // ----------------------------------------------------------
+// PAGINAZIONE (3 elementi per pagina) - VERSIONE CORRETTA
+// ----------------------------------------------------------
+const users = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Users));
+const rowsPerPage = 3;
+let currentPage = 1;
+
+function renderTable() {
+
+    const roleMap = {
+        0: "Employee",
+        1: "Manager"
+    };
+
+    const tbody = document.getElementById("usersTableBody");
+    tbody.innerHTML = "";
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageUsers = users.slice(start, end);
+
+    pageUsers.forEach(user => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${user.FirstName} ${user.LastName}</td>
+                <td>${user.Email}</td>
+                <td>${roleMap[user.Role] ?? user.Role}</td>
+                <td>
+                    ${user.IsWorking
+                        ? '<span class="badge bg-success">Attivo</span>'
+                        : '<span class="badge bg-danger">Non Attivo</span>'}
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-warning"
+                        onclick="editUser('${user.Id}', '${user.FirstName}', '${user.LastName}', '${user.Email}', '${user.Role}')">
+                        <i class="bi bi-pencil-square"></i> Modifica
+                    </button>
+
+                    <button class="btn btn-sm btn-danger"
+                        onclick="deleteUser('${user.Id}', '${user.FirstName} ${user.LastName}')">
+                        <i class="bi bi-trash"></i> Elimina
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    updatePagination();
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(users.length / rowsPerPage);
+
+    document.getElementById("pageCounter").textContent = `${currentPage} / ${totalPages}`;
+
+    document.getElementById("prevBtn").style.visibility =
+        currentPage === 1 ? "hidden" : "visible";
+
+    document.getElementById("nextBtn").style.visibility =
+        currentPage === totalPages ? "hidden" : "visible";
+}
+
+document.getElementById("prevBtn").addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+    }
+});
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+    const totalPages = Math.ceil(users.length / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+    }
+});
+
+// Inizializza tabella
+renderTable();
+
+
+    // ----------------------------------------------------------
+    // Funzioni modali originali
+    // ----------------------------------------------------------
+    function editUser(id, firstName, lastName, email, role) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editFirstName').value = firstName;
+        document.getElementById('editLastName').value = lastName;
+        document.getElementById('editEmail').value = email;
+        document.getElementById('editRole').value = role;
+        new bootstrap.Modal(document.getElementById('editUserModal')).show();
+    }
+
+    function deleteUser(id, name) {
+        document.getElementById('deleteId').value = id;
+        document.getElementById('deleteUserName').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+    }
+
+</script>
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
