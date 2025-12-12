@@ -8,10 +8,15 @@
         <h1>Gestione Account</h1>
         <div>
             <a asp-action="ManagerIndex" class="btn btn-secondary me-2">Torna alla Dashboard</a>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                Crea Nuovo Account
-            </button>
+            
+           
+
         </div>
+         <button type="button" class="btn btn-primary rounded-pill d-flex align-items-center"
+                    style="background-color:#2A4494; border:none; font-weight:bold;"
+                    data-bs-toggle="modal" data-bs-target="#createUserModal">
+                <i class="bi bi-person-plus me-2"></i> Crea Nuovo Account
+            </button>
     </div>
     
     <div class="table-responsive">
