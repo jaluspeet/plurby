@@ -11,8 +11,10 @@
             <div class="card" style="background-color: #2A4494; border-radius: 15px; height: 180px;">
                 <div class="card-body text-center text-white d-flex flex-column justify-content-center">
                     <h3 class="card-title">Dipendenti</h3>
-                    <p class="card-text">Visualizza e gestisci lo stato e la cronologia dei dipendenti</p>
-                    <a asp-action="EmployeesManagement" class="btn btn-lg" style="background-color: #FF8D28; color: white; border-radius: 10px;">Gestisci Dipendenti</a>
+                    <p class="card-text">Visualizza e gestisci lo stato e la cronologia dei dipendenti e calcola lo stipendio mensile</p>
+                    <a asp-action="EmployeesManagement" class="btn btn-lg d-flex align-items-center justify-content-center" style="background-color: #0B6E4F; color: white; border-radius: 15px; padding: 10px 25px;">
+                        <i class="bi bi-people-fill me-2"></i>Gestisci Dipendenti
+                    </a>
                 </div>
             </div>
         </div>
@@ -20,10 +22,14 @@
             <div class="card" style="background-color: #2A4494; border-radius: 15px; height: 180px;">
                 <div class="card-body text-center text-white d-flex flex-column justify-content-center">
                     <h3 class="card-title">Account</h3>
-                    <p class="card-text">Crea, modifica o elimina account utente</p>
-                    <a asp-action="AccountsManagement" class="btn btn-lg" style="background-color: #FF8D28; color: white; border-radius: 10px;">Gestisci Account</a>
+                    <p class="card-text">Crea, modifica o elimina account utente
+                    </p>
+                    <a asp-action="AccountsManagement" class="btn btn-lg d-flex align-items-center justify-content-center" style="background-color: #FF8D28; color: white; border-radius: 15px; padding: 10px 25px;">
+                        <i class="bi bi-person-circle me-2"></i>Gestisci Account
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
