@@ -359,6 +359,17 @@ namespace Plurby.Web.Features.Home
 
             return RedirectToAction(nameof(AccountsManagement));
         }
+
+        [AllowAnonymous]
+        public virtual IActionResult Error(int? statusCode = null)
+        {
+            if (statusCode == 404)
+            {
+                return View("NotFound");
+            }
+            
+            return View();
+        }
     }
 
     public class EmployeeDashboardViewModel
