@@ -117,6 +117,7 @@ namespace Plurby.Web
 
                 endpoints.MapHub<PlurbyHub>("/PlurbyHub");
 
+                endpoints.MapControllerRoute("error", "Error", new { controller = "Home", action = "Error" });
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
             });
         }

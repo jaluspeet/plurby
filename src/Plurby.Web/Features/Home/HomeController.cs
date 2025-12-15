@@ -363,7 +363,7 @@ namespace Plurby.Web.Features.Home
         [AllowAnonymous]
         public virtual IActionResult Error(int? statusCode = null)
         {
-            if (statusCode == 404)
+            if (statusCode.HasValue && statusCode.Value == 404)
             {
                 return View("NotFound");
             }
