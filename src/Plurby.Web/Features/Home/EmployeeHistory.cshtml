@@ -5,10 +5,10 @@
     var identitaCorrente = ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] as IdentitaViewModel;
     var userName = (identitaCorrente?.FirstName != null && identitaCorrente?.LastName != null) 
         ? $"{identitaCorrente.FirstName} {identitaCorrente.LastName}" 
-        : "My";
-    ViewData["Title"] = $"Work History of {userName}";
+        : "Mio";
+    ViewData["Title"] = $"Storico lavorativo di {userName}";
     
-    // Group work entries by month
+    // Raggruppa le voci di lavoro per mese
     var groupedHistory = Model.History
         .GroupBy(e => new { e.StartTime.Year, e.StartTime.Month })
         .OrderByDescending(g => g.Key.Year)
@@ -19,7 +19,7 @@
     var selectedMonth = Context.Request.Query["month"].FirstOrDefault();
     int monthFilter = string.IsNullOrEmpty(selectedMonth) ? currentMonth : int.Parse(selectedMonth);
     
-    // Calculate selected month entries
+    // Calcola le voci del mese selezionato
     var selectedMonthEntries = Model.History
         .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
         .OrderByDescending(e => e.StartTime)
@@ -29,13 +29,13 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <h2 class="me-3">@userName's Work History</h2>
+            <h2 class="me-3">Storico lavorativo di @userName</h2>
 
             <!-- Selettore mese moderno con icone e frecce -->
             <div class="btn-group">
                 <!-- Bottone mese precedente -->
                 <button type="button" class="btn text-white d-flex align-items-center justify-content-center"
-                        id="prevMonth" title="Previous Month"
+                        id="prevMonth" title="Mese precedente"
                         style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
                     <i class="bi bi-arrow-left-circle"></i>
                 </button>
@@ -69,30 +69,36 @@
 
                 <!-- Bottone mese successivo -->
                 <button type="button" class="btn text-white d-flex align-items-center justify-content-center"
-                        id="nextMonth" title="Next Month"
+                        id="nextMonth" title="Mese successivo"
                         style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
                     <i class="bi bi-arrow-right-circle"></i>
                 </button>
             </div>
         </div>
 
-        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+        <!-- Pulsante torna alla dashboard con icona -->
+        <a asp-action="Index" class="btn btn-secondary d-flex align-items-center">
+            <i class="bi bi-speedometer2 me-2"></i>
+            Torna alla dashboard
+        </a>
     </div>
 
-    <!-- Filtered work entries for selected month -->
+    <!-- Voci di lavoro filtrate per mese selezionato -->
     @if (selectedMonthEntries.Any())
     {
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Work Entries - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
+                <h5 class="mb-0">
+                    Voci di lavoro - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))
+                </h5>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped mb-0">
                     <thead>
                         <tr>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Duration</th>
+                            <th>Ora di inizio</th>
+                            <th>Ora di fine</th>
+                            <th>Durata</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -113,7 +119,7 @@
     {
         <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
-            No work entries found for @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
+            Nessuna voce di lavoro trovata per @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
         </div>
     }
 </div>
@@ -121,7 +127,7 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Month selector functionality
+            // Funzionalità selettore mese
             const prevMonthBtn = document.getElementById('prevMonth');
             const nextMonthBtn = document.getElementById('nextMonth');
             const monthDropdownItems = document.querySelectorAll('#monthDropdown .dropdown-item');
@@ -167,4 +173,5 @@
         });
     </script>
 }
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
