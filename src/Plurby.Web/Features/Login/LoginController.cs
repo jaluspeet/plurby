@@ -86,7 +86,7 @@ namespace Plurby.Web.Features.Login
                 }
                 catch (LoginException e)
                 {
-                    ModelState.AddModelError(LoginErrorModelStateKey, e.Message);
+                    ModelState.AddModelError(LoginErrorModelStateKey, "Login failed");
                 }
             }
 
