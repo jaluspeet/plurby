@@ -1,23 +1,35 @@
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Errore";
 }
 
 <div class="container text-center mt-5">
     <div class="row">
         <div class="col-md-12">
             <div class="error-template">
-                <h1 class="display-1">Error</h1>
-                <h2 class="display-4">An error occurred</h2>
-                <div class="error-details">
-                    <p>Sorry, something went wrong. Please try again later.</p>
+                <h1 class="display-1">Stiamo avendo dei problemi</h1>
+                <h2 class="display-4">Ops! Qualcosa è andato storto</h2>
+
+                <div class="error-details mt-3">
+                    <p>
+                        Si è verificato un problema imprevisto. 
+                    </p>
+                    <p>
+                        Niente panico: anche i migliori server hanno una brutta giornata 😄  
+                        Riprova tra poco oppure torna alla home.
+                    </p>
                 </div>
+
                 <div class="error-actions mt-4">
-                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg">
-                        <i class="fas fa-home"></i> Go Home
+                    <a href="@Url.Action("Index", "Home")"
+                       class="btn btn-lg text-white"
+                       style="background-color: #2A4494;">
+                        <i class="fas fa-home"></i> Torna alla Home
                     </a>
-                    <a href="javascript:history.back()" class="btn btn-secondary btn-lg ml-2">
-                        <i class="fas fa-arrow-left"></i> Go Back
+
+                    <a href="javascript:history.back()"
+                       class="btn btn-secondary btn-lg ml-2">
+                        <i class="fas fa-arrow-left"></i> Torna Indietro
                     </a>
                 </div>
             </div>
