@@ -1,4 +1,4 @@
-﻿@model Plurby.Web.Infrastructure.PagingViewModel
+@model Plurby.Web.Infrastructure.PagingViewModel
 <li class="navbar-text text-nowrap">
     <span class="font-weight-light pe-3" title="@SharedLocalizer["numero di elementi individuati con i filtri attuali"]">@Model.TotalItems @SharedLocalizer["elementi"]</span>
 </li>
@@ -8,13 +8,13 @@
 @if (Model.Page <= 1)
 {
     <li>
-        <a class="nav-link disabled" href="#">
+        <a class="nav-link disabled" href="#" aria-label="Prima pagina (disabilitato)">
             <i class="fa-solid fa-angle-double-left" aria-hidden="true"></i>
         </a>
 
     </li>
     <li>
-        <a class="nav-link disabled" href="#">
+        <a class="nav-link disabled" href="#" aria-label="Pagina precedente (disabilitato)">
             <i class="fa-solid fa-angle-left" aria-hidden="true"></i>
         </a>
     </li>
@@ -22,18 +22,18 @@
 else
 {
     <li>
-        <a class="nav-link" href="@Model.FirstPageUrl(Url)" title="@SharedLocalizer["Vai alla prima pagina"]">
+        <a class="nav-link" href="@Model.FirstPageUrl(Url)" title="@SharedLocalizer["Vai alla prima pagina"]" aria-label="@SharedLocalizer["Vai alla prima pagina"]">
             <i class="fa-solid fa-angle-double-left" aria-hidden="true"></i>
         </a>
     </li>
     <li>
-        <a class="nav-link" href="@Model.PrevPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina precedente"]">
+        <a class="nav-link" href="@Model.PrevPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina precedente"]" aria-label="@SharedLocalizer["Vai alla pagina precedente"]">
             <i class="fa-solid fa-angle-left" aria-hidden="true"></i>
         </a>
     </li>
 }
 <li>
-    <select class="form-select onit-page-title-pagesize" title="@SharedLocalizer["Elementi per pagina"]" onchange="javascript:onit.navigateUrlWithoutHystory(this.value)">
+    <select class="form-select onit-page-title-pagesize" title="@SharedLocalizer["Elementi per pagina"]" aria-label="@SharedLocalizer["Elementi per pagina"]" onchange="javascript:onit.navigateUrlWithoutHystory(this.value)">
         @foreach (var size in Model.PageSizeListItems)
         {
             @if (Model.PageSize.ToString() == size.Value)
@@ -50,12 +50,12 @@ else
 @if (Model.Page >= Model.TotalPages())
 {
     <li>
-        <a class="nav-link disabled" href="#">
+        <a class="nav-link disabled" href="#" aria-label="Pagina successiva (disabilitato)">
             <i class="fa-solid fa-angle-right" aria-hidden="true"></i>
         </a>
     </li>
     <li>
-        <a class="nav-link disabled" href="#">
+        <a class="nav-link disabled" href="#" aria-label="Ultima pagina (disabilitato)">
             <i class="fa-solid fa-angle-double-right" aria-hidden="true"></i>
         </a>
     </li>
@@ -63,12 +63,12 @@ else
 else
 {
     <li>
-        <a class="nav-link" href="@Model.NextPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina successiva"]">
+        <a class="nav-link" href="@Model.NextPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina successiva"]" aria-label="@SharedLocalizer["Vai alla pagina successiva"]">
             <i class="fa-solid fa-angle-right" aria-hidden="true"></i>
         </a>
     </li>
     <li>
-        <a class="nav-link" href="@Model.LastPageUrl(Url)" title="@SharedLocalizer["Vai all'ultima pagina"]">
+        <a class="nav-link" href="@Model.LastPageUrl(Url)" title="@SharedLocalizer["Vai all'ultima pagina"]" aria-label="@SharedLocalizer["Vai all'ultima pagina"]">
             <i class="fa-solid fa-angle-double-right" aria-hidden="true"></i>
         </a>
     </li>

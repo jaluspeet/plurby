@@ -36,12 +36,14 @@
             <!-- Selettore mese moderno con icona e freccia -->
             <div class="btn-group">
                 <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
-                        id="prevMonth" title="Mese precedente" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
+                        id="prevMonth" title="Mese precedente" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;"
+                        aria-label="Vai al mese precedente">
                     <i class="bi bi-arrow-left-circle"></i>
                 </button>
 
                 <button type="button" class="btn text-white dropdown-toggle d-flex align-items-center justify-content-between" 
-                        data-bs-toggle="dropdown" id="currentMonthBtn" style="background-color:#2A4494; font-size:1rem; padding:0.5rem 1rem; min-width:220px;">
+                        data-bs-toggle="dropdown" id="currentMonthBtn" style="background-color:#2A4494; font-size:1rem; padding:0.5rem 1rem; min-width:220px;"
+                        aria-label="Seleziona mese da visualizzare">
                     <i class="bi bi-calendar3 me-2"></i>
                     @{
                         var displayDate = new DateTime(monthFilter / 100, monthFilter % 100, 1);
@@ -55,18 +57,19 @@
                     {
                         var monthValue = group.Key.Year * 100 + group.Key.Month;
                         var monthDate = new DateTime(group.Key.Year, group.Key.Month, 1);
-                        <li><a class="dropdown-item @(monthValue == monthFilter ? "active" : "")" href="#" data-month="@monthValue">@monthDate.ToString("MMMM yyyy")</a></li>
+                        <li><a class="dropdown-item @(monthValue == monthFilter ? "active" : "")" href="#" data-month="@monthValue" aria-label="Visualizza mese di @monthDate.ToString("MMMM yyyy")">@monthDate.ToString("MMMM yyyy")</a></li>
                     }
                 </ul>
 
                 <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
-                        id="nextMonth" title="Mese successivo" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
+                        id="nextMonth" title="Mese successivo" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;"
+                        aria-label="Vai al mese successivo">
                     <i class="bi bi-arrow-right-circle"></i>
                 </button>
             </div>
         </div>
 
-       <a asp-action="EmployeesManagement" class="btn btn-secondary d-flex align-items-center">
+       <a asp-action="EmployeesManagement" class="btn btn-secondary d-flex align-items-center" aria-label="Torna alla pagina di gestione dipendenti">
     <i class="bi bi-arrow-left me-2"></i>
     Torna ai dipendenti
 </a>
@@ -89,7 +92,7 @@
                 <div class="card-body d-flex flex-column justify-content-center align-items-center">
                     <h5 class="card-title">Calcola stipendio mensile</h5>
                     <div class="mb-2 w-50">
-                        <input type="number" id="hourlyRate" class="form-control" placeholder="Tariffa oraria (€)" step="0.01" min="0">
+                        <input type="number" id="hourlyRate" class="form-control" placeholder="Tariffa oraria (€)" step="0.01" min="0" aria-label="Inserisci tariffa oraria per calcolo stipendio">
                     </div>
                     <h4 class="text-white" id="monthlyPay">€0.00</h4>
                 </div>
