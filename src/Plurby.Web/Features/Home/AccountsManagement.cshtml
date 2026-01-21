@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Gestione Account</h1>
             <div>
-            <a asp-action="ManagerIndex" class="btn btn-secondary d-flex align-items-center me-2" aria-label="Torna alla dashboard manager">
+            <a asp-action="ManagerIndex" class="btn btn-secondary d-flex align-items-center me-2">
                 <i class="bi bi-speedometer2 me-2"></i>
                 Torna alla Dashboard
             </a>
@@ -15,8 +15,7 @@
 
          <button type="button" class="btn btn-primary rounded-pill d-flex align-items-center"
                     style="background-color:#2A4494; border:none; font-weight:bold;"
-                    data-bs-toggle="modal" data-bs-target="#createUserModal"
-                    aria-label="Apri finestra per creare nuovo account utente">
+                    data-bs-toggle="modal" data-bs-target="#createUserModal">
                 <i class="bi bi-person-plus me-2"></i> Crea Nuovo Account
             </button>
     </div>
@@ -43,14 +42,12 @@
 
         <div>
             <button id="prevBtn" class="btn btn-link text-decoration-underline"
-                    style="color:#FF8D28; font-weight:bold;"
-                    aria-label="Vai alla pagina precedente">
+                    style="color:#FF8D28; font-weight:bold;">
                 <i class="bi bi-arrow-left"></i> Indietro
             </button>
 
             <button id="nextBtn" class="btn"
-                    style="background-color:#0B6E4F; color:white; font-weight:bold;"
-                    aria-label="Vai alla pagina successiva">
+                    style="background-color:#0B6E4F; color:white; font-weight:bold;">
                 Avanti <i class="bi bi-arrow-right"></i>
             </button>
         </div>
@@ -81,38 +78,38 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Crea Nuovo Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi finestra creazione account"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form asp-action="CreateAccount" method="post">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="createFirstName" class="form-label">Nome</label>
-                        <input type="text" class="form-control" id="createFirstName" name="firstName" required aria-label="Inserisci nome dell'utente">
+                        <input type="text" class="form-control" id="createFirstName" name="firstName" required>
                     </div>
                     <div class="mb-3">
                         <label for="createLastName" class="form-label">Cognome</label>
-                        <input type="text" class="form-control" id="createLastName" name="lastName" required aria-label="Inserisci cognome dell'utente">
+                        <input type="text" class="form-control" id="createLastName" name="lastName" required>
                     </div>
                     <div class="mb-3">
                         <label for="createEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="createEmail" name="email" required aria-label="Inserisci email dell'utente">
+                        <input type="email" class="form-control" id="createEmail" name="email" required>
                     </div>
                     <div class="mb-3">
                         <label for="createRole" class="form-label">Ruolo</label>
-                        <select class="form-control" id="createRole" name="role" required aria-label="Seleziona ruolo utente">
+                        <select class="form-control" id="createRole" name="role" required>
                             <option value="Dipendente">Dipendente</option>
                             <option value="Manager">Manager</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="createPassword" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="createPassword" name="password" required aria-label="Inserisci password per il nuovo account">
+                        <input type="password" class="form-control" id="createPassword" name="password" required>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Annulla creazione account">Annulla</button>
-                    <button type="submit" class="btn btn-primary" aria-label="Conferma creazione nuovo account">Crea Account</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Crea Account</button>
                 </div>
             </form>
         </div>
@@ -125,40 +122,40 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Modifica Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi finestra modifica account"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form asp-action="UpdateAccount" method="post">
                 <input type="hidden" id="editId" name="id">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="editFirstName" class="form-label">Nome</label>
-                        <input type="text" class="form-control" id="editFirstName" name="firstName" required aria-label="Modifica nome dell'utente">
+                        <input type="text" class="form-control" id="editFirstName" name="firstName" required>
                     </div>
                     <div class="mb-3">
                         <label for="editLastName" class="form-label">Cognome</label>
-                        <input type="text" class="form-control" id="editLastName" name="lastName" required aria-label="Modifica cognome dell'utente">
+                        <input type="text" class="form-control" id="editLastName" name="lastName" required>
                     </div>
                     <div class="mb-3">
                         <label for="editEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" name="email" required aria-label="Modifica email dell'utente">
+                        <input type="email" class="form-control" id="editEmail" name="email" required>
                     </div>
                     <div class="mb-3">
                         <label for="editRole" class="form-label">Ruolo</label>
-                        <select class="form-control" id="editRole" name="role" required aria-label="Modifica ruolo utente">
+                        <select class="form-control" id="editRole" name="role" required>
                             <option value="Dipendente">Dipendente</option>
                             <option value="Manager">Manager</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="editPassword" class="form-label">Password (lascia vuoto per mantenere l'attuale)</label>
-                        <input type="password" class="form-control" id="editPassword" name="password" aria-label="Modifica password utente (opzionale)">
+                        <input type="password" class="form-control" id="editPassword" name="password">
                         <small class="form-text text-light">Lascia vuoto per mantenere la password corrente</small>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Annulla modifica account">Annulla</button>
-                    <button type="submit" class="btn btn-primary" aria-label="Conferma aggiornamento account">Aggiorna Account</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Aggiorna Account</button>
                 </div>
             </form>
         </div>
@@ -171,7 +168,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Elimina Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi finestra eliminazione account"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
@@ -183,8 +180,8 @@
                 <input type="hidden" id="deleteId" name="id">
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Annulla eliminazione account">Annulla</button>
-                    <button type="submit" class="btn btn-danger" aria-label="Conferma eliminazione account">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash"></i> Elimina Account
                     </button>
                 </div>
@@ -230,14 +227,12 @@ function renderTable() {
                 </td>
                 <td>
                     <button class="btn btn-sm btn-warning"
-                        onclick="editUser('${user.Id}', '${user.FirstName}', '${user.LastName}', '${user.Email}', '${user.Role}')"
-                        aria-label="Modifica account di ${user.FirstName} ${user.LastName}">
+                        onclick="editUser('${user.Id}', '${user.FirstName}', '${user.LastName}', '${user.Email}', '${user.Role}')">
                         <i class="bi bi-pencil-square"></i> Modifica
                     </button>
 
                     <button class="btn btn-sm btn-danger"
-                        onclick="deleteUser('${user.Id}', '${user.FirstName} ${user.LastName}')"
-                        aria-label="Elimina account di ${user.FirstName} ${user.LastName}">
+                        onclick="deleteUser('${user.Id}', '${user.FirstName} ${user.LastName}')">
                         <i class="bi bi-trash"></i> Elimina
                     </button>
                 </td>

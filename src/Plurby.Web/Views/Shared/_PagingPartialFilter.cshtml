@@ -7,27 +7,27 @@
 @if (Model.Page <= 1)
 {
 
-    <a class="btn btn-link disabled" href="#" aria-label="Prima pagina (disabilitato)">
+    <a class="btn btn-link disabled" href="#">
         <i class="fa-solid fa-angles-left" aria-hidden="true"></i>
     </a>
 
 
-    <a class="btn btn-link disabled" href="#" aria-label="Pagina precedente (disabilitato)">
+    <a class="btn btn-link disabled" href="#">
         <i class="fa-solid fa-angle-left" aria-hidden="true"></i>
     </a>
 
 }
 else
 {
-    <a class="btn btn-link" href="@Model.FirstPageUrl(Url)" title="@SharedLocalizer["Vai alla prima pagina"]" aria-label="@SharedLocalizer["Vai alla prima pagina"]">
+    <a class="btn btn-link" href="@Model.FirstPageUrl(Url)" title="@SharedLocalizer["Vai alla prima pagina"]">
         <i class="fa-solid fa-angles-left" aria-hidden="true"></i>
     </a>
-    <a class="btn btn-link" href="@Model.PrevPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina precedente"]" aria-label="@SharedLocalizer["Vai alla pagina precedente"]">
+    <a class="btn btn-link" href="@Model.PrevPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina precedente"]">
         <i class="fa-solid fa-angle-left" aria-hidden="true"></i>
     </a>
 }
 
-<select class="form-select" name="PageSize" title="@SharedLocalizer["Elementi per pagina"]" aria-label="@SharedLocalizer["Elementi per pagina"]" onchange="javascript:onit.navigateUrlWithoutHystory(this.value)">
+<select class="form-select" name="PageSize" title="@SharedLocalizer["Elementi per pagina"]" onchange="javascript:onit.navigateUrlWithoutHystory(this.value)">
     @foreach (var size in Model.PageSizeListItems)
     {
         @if (Model.PageSize.ToString() == size.Value)
@@ -43,19 +43,19 @@ else
 
 @if (Model.Page >= Model.TotalPages())
 {
-    <a class="btn btn-link disabled" href="#" aria-label="Pagina successiva (disabilitato)">
+    <a class="btn btn-link disabled" href="#">
         <i class="fa-solid fa-angle-right" aria-hidden="true"></i>
     </a>
-    <a class="btn btn-link disabled" href="#" aria-label="Ultima pagina (disabilitato)">
+    <a class="btn btn-link disabled" href="#">
         <i class="fa-solid fa-angles-right" aria-hidden="true"></i>
     </a>
 }
 else
 {
-    <a class="btn btn-link" href="@Model.NextPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina successiva"]" aria-label="@SharedLocalizer["Vai alla pagina successiva"]">
+    <a class="btn btn-link" href="@Model.NextPageUrl(Url)" title="@SharedLocalizer["Vai alla pagina successiva"]">
         <i class="fa-solid fa-angle-right" aria-hidden="true"></i>
     </a>
-    <a class="btn btn-link" href="@Model.LastPageUrl(Url)" title="@SharedLocalizer["Vai all'ultima pagina"]" aria-label="@SharedLocalizer["Vai all'ultima pagina"]">
+    <a class="btn btn-link" href="@Model.LastPageUrl(Url)" title="@SharedLocalizer["Vai all'ultima pagina"]">
         <i class="fa-solid fa-angles-right" aria-hidden="true"></i>
     </a>
 }

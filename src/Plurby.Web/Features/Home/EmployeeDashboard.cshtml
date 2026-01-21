@@ -21,7 +21,7 @@
                 <p class="text-muted">Ora di inizio: @Model.Status.StartTime.Value.ToLocalTime().ToString("g")</p>
             </div>
             <form asp-action="EndWork" method="post">
-                <button type="submit" class="btn btn-lg px-5 py-3" style="background-color:#D5202C; color:white; border-radius:12px;" aria-label="Termina la sessione di lavoro">
+                <button type="submit" class="btn btn-lg px-5 py-3" style="background-color:#D5202C; color:white; border-radius:12px;">
                     <i class="bi bi-stop-circle me-2"></i> TERMINA LAVORO
                 </button>
             </form>
@@ -30,7 +30,7 @@
         {
             <h2 class="mb-4">Pronto per iniziare?</h2>
             <form asp-action="StartWork" method="post">
-                <button type="submit" class="btn btn-lg px-5 py-3" style="background-color:#0B6E4F; color:white; border-radius:12px;" aria-label="Inizia una nuova sessione di lavoro">
+                <button type="submit" class="btn btn-lg px-5 py-3" style="background-color:#0B6E4F; color:white; border-radius:12px;">
                     <i class="bi bi-play-circle me-2"></i> INIZIA LAVORO
                 </button>
             </form>
@@ -40,7 +40,7 @@
     <hr />
 
     <div class="text-center">
-        <a asp-action="EmployeeHistory" class="btn" style="background-color:#2A4494; color:white; border-radius:12px;" aria-label="Visualizza lo storico delle sessioni di lavoro">
+        <a asp-action="EmployeeHistory" class="btn" style="background-color:#2A4494; color:white; border-radius:12px;">
             <i class="bi bi-clock-history me-2"></i> Visualizza Storico Lavoro
         </a>
     </div>

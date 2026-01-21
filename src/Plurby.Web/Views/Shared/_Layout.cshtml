@@ -83,7 +83,7 @@
     <div class="sticky-top" id="onit-page-sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark header-custom">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/" aria-label="Logo Plurby - torna alla homepage">
+                <a class="navbar-brand" href="/">
                     @if (identitaCorrente != null)
                     {
                         if (!string.IsNullOrEmpty(identitaCorrente.FirstName) && !string.IsNullOrEmpty(identitaCorrente.LastName))
@@ -100,7 +100,7 @@
                         <span>Plurby S.p.A.</span>
                     }
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Apri menu navigazione">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="collapse navbar-collapse flex-wrap" id="navbarSupportedContent">
@@ -108,11 +108,11 @@
                         @if (identitaCorrente != null)
                         {
                             <li class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu opzioni utente">
+                                <a href="#" class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     @identitaCorrente.EmailUtenteCorrente
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" role="menu">
-                                    <a class="dropdown-item logout-btn" href="javascript:void(0)" onclick="javascript: document.getElementById('POST_LogOut').submit()" title="@SharedLocalizer["Chiudi sessione di lavoro"]" aria-label="Esci dall'applicazione">
+                                    <a class="dropdown-item logout-btn" href="javascript:void(0)" onclick="javascript: document.getElementById('POST_LogOut').submit()" title="@SharedLocalizer["Chiudi sessione di lavoro"]">
                                         <i class="fa-solid fa-right-from-bracket"></i>&nbsp;@SharedLocalizer["Esci"]
                                     </a>
                                     <form autocomplete="off" method="post" action="@Url.Action(MVC.Login.Logout())" id="POST_LogOut" display="none"></form>
