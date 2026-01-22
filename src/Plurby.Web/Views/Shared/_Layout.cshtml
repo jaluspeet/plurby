@@ -76,6 +76,39 @@
             opacity: 0.8;
             text-decoration: none;
         }
+
+        /* Page title indicator */
+        .page-title-indicator {
+            font-weight: 500;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Navbar separator */
+        .navbar-separator {
+            width: 1px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.3);
+            align-self: center;
+        }
+
+        /* Active navigation item */
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-radius: 4px;
+        }
+
+        /* Logo styling */
+        .navbar-brand img {
+            max-height: 40px;
+            object-fit: contain;
+        }
     </style>
 }
 
@@ -83,33 +116,65 @@
     <div class="sticky-top" id="onit-page-sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark header-custom">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/">
-                    @if (identitaCorrente != null)
-                    {
-                        if (!string.IsNullOrEmpty(identitaCorrente.FirstName) && !string.IsNullOrEmpty(identitaCorrente.LastName))
-                        {
-                            <span>Benvenutə, @identitaCorrente.FirstName @identitaCorrente.LastName!</span>
-                        }
-                        else
-                        {
-                            <span>Benvenutə, @(identitaCorrente.EmailUtenteCorrente.Split('@')[0])!</span>
-                        }
-                    }
-                    else
-                    {
-                        <span>Plurby S.p.A.</span>
-                    }
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <img src="~/images/logo.png" alt="Plurby Logo" class="me-3" style="height: 40px; width: auto;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                    <span style="display: none;">Plurby</span>
                 </a>
+                
+                <!-- Page Title Indicator -->
+                <div class="navbar-text text-white ms-4 d-none d-md-block">
+                    <span class="page-title-indicator">@ViewData["Title"]</span>
+                </div>
+
+                <!-- Separator -->
+                <div class="navbar-separator d-none d-md-block ms-4 me-4"></div>
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="collapse navbar-collapse flex-wrap" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav me-auto ms-md-3">
+                        @if (identitaCorrente != null)
+                        {
+                            @if (identitaCorrente.Role == Plurby.Services.Shared.UserRole.Manager)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link px-3 @(ViewContext.RouteData.Values["action"]?.ToString() == "ManagerIndex" || ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-action="ManagerIndex" asp-controller="Home">
+                                        <i class="fa-solid fa-gauge me-1"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link px-3 @(ViewContext.RouteData.Values["action"]?.ToString() == "EmployeesManagement" ? "active" : "")" asp-action="EmployeesManagement" asp-controller="Home">
+                                        <i class="fa-solid fa-users me-1"></i>Dipendenti
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link px-3 @(ViewContext.RouteData.Values["action"]?.ToString() == "AccountsManagement" ? "active" : "")" asp-action="AccountsManagement" asp-controller="Home">
+                                        <i class="fa-solid fa-user-gear me-1"></i>Account
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link px-3 @(ViewContext.RouteData.Values["action"]?.ToString() == "EmployeeDashboard" || ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-action="Index" asp-controller="Home">
+                                        <i class="fa-solid fa-gauge me-1"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link px-3 @(ViewContext.RouteData.Values["action"]?.ToString() == "EmployeeHistory" ? "active" : "")" asp-action="EmployeeHistory" asp-controller="Home">
+                                        <i class="fa-solid fa-clock-rotate-left me-1"></i>Storico
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
                     <ul class="nav navbar-nav ms-auto">
                         @if (identitaCorrente != null)
                         {
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @identitaCorrente.EmailUtenteCorrente
+                                    <i class="fa-solid fa-user me-1"></i>@identitaCorrente.EmailUtenteCorrente
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" role="menu">
                                     <a class="dropdown-item logout-btn" href="javascript:void(0)" onclick="javascript: document.getElementById('POST_LogOut').submit()" title="@SharedLocalizer["Chiudi sessione di lavoro"]">

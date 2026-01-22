@@ -44,7 +44,8 @@ namespace Plurby.Web.Areas
                 {
                     EmailUtenteCorrente = email,
                     FirstName = user?.FirstName ?? "",
-                    LastName = user?.LastName ?? ""
+                    LastName = user?.LastName ?? "",
+                    Role = user?.Role ?? UserRole.Employee
                 };
             }
             else

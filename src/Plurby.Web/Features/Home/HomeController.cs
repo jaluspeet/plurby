@@ -44,7 +44,8 @@ namespace Plurby.Web.Features.Home
                 {
                     EmailUtenteCorrente = user.Email,
                     FirstName = user.FirstName,
-                    LastName = user.LastName
+                    LastName = user.LastName,
+                    Role = user.Role
                 };
                 return View("ManagerIndex");
             }
@@ -56,7 +57,8 @@ namespace Plurby.Web.Features.Home
                 {
                     EmailUtenteCorrente = user.Email,
                     FirstName = user.FirstName,
-                    LastName = user.LastName
+                    LastName = user.LastName,
+                    Role = user.Role
                 };
 
                 var history = await _service.Query(new WorkHistoryQuery { UserId = user.Id });
@@ -137,7 +139,8 @@ namespace Plurby.Web.Features.Home
             {
                 EmailUtenteCorrente = currentUser.Email,
                 FirstName = currentUser.FirstName,
-                LastName = currentUser.LastName
+                LastName = currentUser.LastName,
+                Role = currentUser.Role
             };
 
             // Store current user role for view conditional rendering
@@ -208,7 +211,8 @@ namespace Plurby.Web.Features.Home
             {
                 EmailUtenteCorrente = user.Email,
                 FirstName = user.FirstName,
-                LastName = user.LastName
+                LastName = user.LastName,
+                Role = user.Role
             };
 
             // Store current user role for view conditional rendering
@@ -247,7 +251,8 @@ namespace Plurby.Web.Features.Home
             {
                 EmailUtenteCorrente = user.Email ?? email,
                 FirstName = user.FirstName ?? "",
-                LastName = user.LastName ?? ""
+                LastName = user.LastName ?? "",
+                Role = user.Role
             };
 
             return View("ManagerIndex");
@@ -273,7 +278,8 @@ namespace Plurby.Web.Features.Home
             {
                 EmailUtenteCorrente = user.Email,
                 FirstName = user.FirstName,
-                LastName = user.LastName
+                LastName = user.LastName,
+                Role = user.Role
             };
 
             var employees = await _service.Query(new UsersIndexQuery
@@ -305,7 +311,8 @@ namespace Plurby.Web.Features.Home
             {
                 EmailUtenteCorrente = user.Email,
                 FirstName = user.FirstName,
-                LastName = user.LastName
+                LastName = user.LastName,
+                Role = user.Role
             };
 
             var users = await _service.Query(new UsersIndexQuery
