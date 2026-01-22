@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Plurby.Infrastructure;
 using Plurby.Services.Shared;
 
@@ -12,7 +12,7 @@ namespace Plurby.Services
 
         public PlurbyDbContext(DbContextOptions<PlurbyDbContext> options) : base(options)
         {
-            DataGenerator.InitializeUsers(this);
+            // Data seeding is handled at application startup to avoid multiple initializations
         }
 
         public DbSet<User> Users { get; set; }

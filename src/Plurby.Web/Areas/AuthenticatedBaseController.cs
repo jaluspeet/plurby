@@ -37,7 +37,15 @@ namespace Plurby.Web.Areas
         {
             if (context.HttpContext != null && context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
-                var email = context.HttpContext.User.Claims.Where(x => x.Type == ClaimTypes.Email).First().Value;
+                var emailClaim = context.HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email);
+                if (emailClaim == null)
+                {
+                    await HttpContext.SignOutAsync();
+                    context.Result = new RedirectResult("/Login/Login");
+                    return;
+                }
+
+                var email = emailClaim.Value;
                 var user = await _sharedService.Query(new UserByEmailQuery { Email = email });
                 
                 ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] = new IdentitaViewModel

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 using Plurby.Infrastructure;
 using Plurby.Services.Shared;
 using Plurby.Web.Infrastructure;
@@ -19,15 +18,13 @@ namespace Plurby.Web.Features.Login
     {
         public static string LoginErrorModelStateKey = "LoginError";
         private readonly SharedService _sharedService;
-        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
-        public LoginController(SharedService sharedService, IStringLocalizer<SharedResource> sharedLocalizer)
+        public LoginController(SharedService sharedService)
         {
             _sharedService = sharedService;
-            _sharedLocalizer = sharedLocalizer;
         }
 
-        private ActionResult LoginAndRedirect(UserDetailDTO utente, string returnUrl, bool rememberMe)
+        private async Task<ActionResult> LoginAndRedirect(UserDetailDTO utente, string returnUrl, bool rememberMe)
         {
             var claims = new List<Claim>
             {
@@ -38,7 +35,7 @@ namespace Plurby.Web.Features.Login
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
             {
                 ExpiresUtc = (rememberMe) ? DateTimeOffset.UtcNow.AddMonths(3) : null,
                 IsPersistent = rememberMe,
@@ -70,7 +67,7 @@ namespace Plurby.Web.Features.Login
         }
 
         [HttpPost]
-        public async virtual Task<ActionResult> Login(LoginViewModel model)
+        public virtual async Task<ActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -82,9 +79,9 @@ namespace Plurby.Web.Features.Login
                         Password = model.Password,
                     });
 
-                    return LoginAndRedirect(utente, model.ReturnUrl, model.RememberMe);
+                    return await LoginAndRedirect(utente, model.ReturnUrl, model.RememberMe);
                 }
-                catch (LoginException e)
+                catch (LoginException)
                 {
                     ModelState.AddModelError(LoginErrorModelStateKey, "Login failed");
                 }
@@ -94,9 +91,9 @@ namespace Plurby.Web.Features.Login
         }
 
         [HttpPost]
-        public virtual IActionResult Logout()
+        public virtual async Task<IActionResult> Logout()
         {
-            HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync();
 
             Alerts.AddSuccess(this, "Utente scollegato correttamente");
             return RedirectToAction(nameof(Login));

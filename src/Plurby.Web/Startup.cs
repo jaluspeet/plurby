@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Plurby.Infrastructure;
 using Plurby.Services;
 using Plurby.Web.Infrastructure;
 using Plurby.Web.SignalR.Hubs;
@@ -120,6 +121,13 @@ namespace Plurby.Web
                 endpoints.MapControllerRoute("error", "Error", new { controller = "Home", action = "Error" });
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
             });
+
+            // Initialize database with seed data
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<PlurbyDbContext>();
+                DataGenerator.InitializeUsers(context);
+            }
         }
     }
 
