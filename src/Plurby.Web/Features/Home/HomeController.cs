@@ -59,9 +59,17 @@ namespace Plurby.Web.Features.Home
                     LastName = user.LastName
                 };
 
+                var history = await _service.Query(new WorkHistoryQuery { UserId = user.Id });
+                var today = DateTime.Now.Date;
+                var todayEntries = history
+                    .Where(e => e.StartTime.ToLocalTime().Date == today)
+                    .OrderByDescending(e => e.StartTime)
+                    .ToList();
+
                 var model = new EmployeeDashboardViewModel
                 {
-                    Status = status
+                    Status = status,
+                    TodayEntries = todayEntries
                 };
                 return View("EmployeeDashboard", model);
             }
@@ -544,6 +552,7 @@ namespace Plurby.Web.Features.Home
     public class EmployeeDashboardViewModel
     {
         public CurrentWorkStatusDTO Status { get; set; }
+        public IEnumerable<WorkHistoryDTO> TodayEntries { get; set; } = Enumerable.Empty<WorkHistoryDTO>();
     }
 
     public class EmployeeDetailViewModel

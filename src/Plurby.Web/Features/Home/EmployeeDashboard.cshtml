@@ -20,11 +20,9 @@
                 <h3 id="timer" class="text-primary">00:00:00</h3>
                 <p class="text-muted">Ora di inizio: @Model.Status.StartTime.Value.ToLocalTime().ToString("g")</p>
             </div>
-            <form asp-action="EndWork" method="post">
-                <button type="submit" class="btn btn-lg px-5 py-3" style="background-color:#D5202C; color:white; border-radius:12px;">
-                    <i class="bi bi-stop-circle me-2"></i> TERMINA LAVORO
-                </button>
-            </form>
+            <button type="button" class="btn btn-lg px-5 py-3" style="background-color:#D5202C; color:white; border-radius:12px;" data-bs-toggle="modal" data-bs-target="#confirmEndWorkModal">
+                <i class="bi bi-stop-circle me-2"></i> TERMINA LAVORO
+            </button>
         }
         else
         {
@@ -39,12 +37,85 @@
 
     <hr />
 
+    <!-- Today's Entries Section -->
+    @if (Model.TodayEntries.Any())
+    {
+        <div class="mb-4">
+            <h4 class="mb-3">Voci di lavoro di oggi</h4>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ora di inizio</th>
+                                <th>Ora di fine</th>
+                                <th>Durata</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in Model.TodayEntries)
+                            {
+                                <tr>
+                                    <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
+                                    <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
+                                    <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="text-center">
         <a asp-action="EmployeeHistory" class="btn" style="background-color:#2A4494; color:white; border-radius:12px;">
             <i class="bi bi-clock-history me-2"></i> Visualizza Storico Lavoro
         </a>
     </div>
 </div>
+
+<!-- Confirmation Modal for End Work -->
+@if (Model.Status.IsWorking && Model.Status.StartTime.HasValue)
+{
+    <div class="modal fade" id="confirmEndWorkModal" tabindex="-1" aria-labelledby="confirmEndWorkModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmEndWorkModalLabel">Conferma Termina Lavoro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Confermi di voler terminare questa sessione di lavoro?</p>
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Ora di inizio:</strong></div>
+                                <div class="col-7" id="modalStartTime">@Model.Status.StartTime.Value.ToLocalTime().ToString("g")</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5"><strong>Ora di fine:</strong></div>
+                                <div class="col-7" id="modalEndTime">-</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-5"><strong>Durata:</strong></div>
+                                <div class="col-7" id="modalDuration">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <form asp-action="EndWork" method="post" style="display: inline;">
+                        <button type="submit" class="btn" style="background-color:#D5202C; color:white;">
+                            <i class="bi bi-stop-circle me-2"></i> Conferma e Termina
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (Model.Status.IsWorking && Model.Status.StartTime.HasValue)
 {
@@ -69,6 +140,33 @@
 
             setInterval(updateTimer, 1000);
             updateTimer();
+
+            // Update modal with current time when it opens
+            var confirmModal = document.getElementById('confirmEndWorkModal');
+            if (confirmModal) {
+                confirmModal.addEventListener('show.bs.modal', function () {
+                    var now = new Date();
+                    var diff = now - startTime;
+                    
+                    var seconds = Math.floor((diff / 1000) % 60);
+                    var minutes = Math.floor((diff / (1000 * 60)) % 60);
+                    var hours = Math.floor((diff / (1000 * 60 * 60)));
+                    
+                    var durationStr = 
+                        (hours < 10 ? "0" + hours : hours) + ":" + 
+                        (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                        (seconds < 10 ? "0" + seconds : seconds);
+                    
+                    // Format date to match the format used in the app (g format: M/d/yyyy h:mm AM/PM or dd/MM/yyyy HH:mm based on locale)
+                    var day = String(now.getDate()).padStart(2, '0');
+                    var month = String(now.getMonth() + 1).padStart(2, '0');
+                    var year = now.getFullYear();
+                    var hours = String(now.getHours()).padStart(2, '0');
+                    var minutes = String(now.getMinutes()).padStart(2, '0');
+                    document.getElementById('modalEndTime').textContent = day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+                    document.getElementById('modalDuration').textContent = durationStr;
+                });
+            }
         });
     </script>
 }
