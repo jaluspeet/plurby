@@ -99,15 +99,33 @@
                             <th>Ora di inizio</th>
                             <th>Ora di fine</th>
                             <th>Durata</th>
+                            @if (ViewData["IsEmployee"] as bool? == true)
+                            {
+                                <th>Azioni</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var entry in selectedMonthEntries)
                         {
-                            <tr>
+                            <tr class="@(entry.HasPendingProposal ? "table-warning" : "")">
                                 <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
                                 <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
                                 <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
+                                @if (ViewData["IsEmployee"] as bool? == true)
+                                {
+                                    <td>
+                                        @if (entry.HasPendingProposal)
+                                        {
+                                            <span class="badge bg-warning text-dark me-2">
+                                                <i class="bi bi-clock-history"></i> Proposta in attesa
+                                            </span>
+                                        }
+                                        <button type="button" class="btn btn-sm btn-info" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')">
+                                            <i class="bi bi-pencil"></i> @(entry.HasPendingProposal ? "Modifica proposta" : "Proponi modifica")
+                                        </button>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
@@ -123,6 +141,52 @@
         </div>
     }
 </div>
+
+<!-- Modal per proporre modifica work entry -->
+@if (ViewData["IsEmployee"] as bool? == true)
+{
+    <div class="modal fade" id="proposeWorkEntryModal" tabindex="-1" aria-labelledby="proposeWorkEntryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="proposeWorkEntryModalLabel">Proponi Modifica Work Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="proposeWorkEntryForm" method="post" asp-action="ProposeWorkEntryChange">
+                    <div class="modal-body">
+                        <input type="hidden" id="proposeWorkEntryId" name="workEntryId" />
+                        <input type="hidden" id="proposeMonth" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Proponi una modifica ai tempi di lavoro. Un manager dovrà approvare la modifica.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="proposeStartTime" class="form-label">Ora inizio proposta</label>
+                            <input type="datetime-local" class="form-control" id="proposeStartTime" name="proposedStartTime" required />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="proposeEndTime" class="form-label">Ora fine proposta (opzionale)</label>
+                            <input type="datetime-local" class="form-control" id="proposeEndTime" name="proposedEndTime" />
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="proposeClearEndTime" />
+                                <label class="form-check-label" for="proposeClearEndTime">
+                                    Rimuovi ora fine
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Invia proposta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
 @section Scripts {
     <script>
@@ -170,7 +234,53 @@
                     window.location.search = urlParams.toString();
                 });
             });
+
+            // Handle clear end time checkbox for propose modal
+            const proposeClearEndTimeCheckbox = document.getElementById('proposeClearEndTime');
+            const proposeEndTimeInput = document.getElementById('proposeEndTime');
+            
+            if (proposeClearEndTimeCheckbox && proposeEndTimeInput) {
+                proposeClearEndTimeCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        proposeEndTimeInput.disabled = true;
+                        proposeEndTimeInput.value = '';
+                    } else {
+                        proposeEndTimeInput.disabled = false;
+                    }
+                });
+            }
+
+            // Handle form submission - ensure empty endTime is sent as empty string
+            const proposeWorkEntryForm = document.getElementById('proposeWorkEntryForm');
+            if (proposeWorkEntryForm) {
+                proposeWorkEntryForm.addEventListener('submit', function(e) {
+                    if (proposeEndTimeInput.disabled || !proposeEndTimeInput.value) {
+                        proposeEndTimeInput.value = '';
+                    }
+                });
+            }
         });
+
+        function openProposeModal(workEntryId, startTime, endTime) {
+            document.getElementById('proposeWorkEntryId').value = workEntryId;
+            document.getElementById('proposeStartTime').value = startTime;
+            
+            const proposeEndTimeInput = document.getElementById('proposeEndTime');
+            const proposeClearEndTimeCheckbox = document.getElementById('proposeClearEndTime');
+            
+            if (endTime && endTime.trim() !== '') {
+                proposeEndTimeInput.value = endTime;
+                proposeEndTimeInput.disabled = false;
+                proposeClearEndTimeCheckbox.checked = false;
+            } else {
+                proposeEndTimeInput.value = '';
+                proposeEndTimeInput.disabled = true;
+                proposeClearEndTimeCheckbox.checked = true;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('proposeWorkEntryModal'));
+            modal.show();
+        }
     </script>
 }
 

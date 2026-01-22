@@ -7,6 +7,7 @@ using Plurby.Services.Shared;
 using Plurby.Web.Areas;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Plurby.Web.Features.Home
@@ -131,6 +132,9 @@ namespace Plurby.Web.Features.Home
                 LastName = currentUser.LastName
             };
 
+            // Store current user role for view conditional rendering
+            ViewData["IsManager"] = currentUser.Role == UserRole.Manager;
+
             var user = await _service.Query(new UserDetailQuery { Id = id });
             var history = await _service.Query(new WorkHistoryQuery { UserId = id });
 
@@ -198,6 +202,10 @@ namespace Plurby.Web.Features.Home
                 FirstName = user.FirstName,
                 LastName = user.LastName
             };
+
+            // Store current user role for view conditional rendering
+            ViewData["IsEmployee"] = user.Role == UserRole.Employee;
+            ViewData["CurrentUserId"] = user.Id;
 
             var model = new EmployeeHistoryViewModel
             {
@@ -358,6 +366,167 @@ namespace Plurby.Web.Features.Home
             await _service.Handle(new DeleteUserCommand { Id = id });
 
             return RedirectToAction(nameof(AccountsManagement));
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> EditWorkEntry(Guid workEntryId, DateTime startTime, DateTime? endTime, Guid employeeId, string month = null)
+        {
+            var email = User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var currentUser = await _service.Query(new UserByEmailQuery { Email = email });
+            if (currentUser == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            // Only managers can edit work entries
+            if (currentUser.Role != UserRole.Manager)
+            {
+                return Forbid();
+            }
+
+            await _service.Handle(new UpdateWorkEntryCommand
+            {
+                WorkEntryId = workEntryId,
+                StartTime = startTime,
+                EndTime = endTime
+            });
+
+            var redirectParams = new Dictionary<string, object> { { "id", employeeId } };
+            if (!string.IsNullOrEmpty(month))
+            {
+                redirectParams["month"] = month;
+            }
+
+            return RedirectToAction(nameof(EmployeeDetail), redirectParams);
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> ProposeWorkEntryChange(Guid workEntryId, DateTime proposedStartTime, DateTime? proposedEndTime, string month = null)
+        {
+            var email = User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var currentUser = await _service.Query(new UserByEmailQuery { Email = email });
+            if (currentUser == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            // Only employees can propose changes (managers can edit directly)
+            if (currentUser.Role != UserRole.Employee)
+            {
+                return Forbid();
+            }
+
+            // Verify the work entry belongs to the current user
+            var history = await _service.Query(new WorkHistoryQuery { UserId = currentUser.Id });
+            if (!history.Any(x => x.Id == workEntryId))
+            {
+                return Forbid();
+            }
+
+            await _service.Handle(new ProposeWorkEntryChangeCommand
+            {
+                WorkEntryId = workEntryId,
+                ProposedByUserId = currentUser.Id,
+                ProposedStartTime = proposedStartTime,
+                ProposedEndTime = proposedEndTime
+            });
+
+            if (!string.IsNullOrEmpty(month))
+            {
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            return RedirectToAction(nameof(EmployeeHistory));
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> AcceptProposal(Guid proposalId, Guid employeeId, string month = null)
+        {
+            var email = User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var currentUser = await _service.Query(new UserByEmailQuery { Email = email });
+            if (currentUser == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            // Only managers can accept proposals
+            if (currentUser.Role != UserRole.Manager)
+            {
+                return Forbid();
+            }
+
+            await _service.Handle(new AcceptProposalCommand
+            {
+                ProposalId = proposalId,
+                ProcessedByUserId = currentUser.Id
+            });
+
+            var redirectParams = new Dictionary<string, object> { { "id", employeeId } };
+            if (!string.IsNullOrEmpty(month))
+            {
+                redirectParams["month"] = month;
+            }
+
+            return RedirectToAction(nameof(EmployeeDetail), redirectParams);
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> RejectProposal(Guid proposalId, Guid employeeId, string month = null)
+        {
+            var email = User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            var currentUser = await _service.Query(new UserByEmailQuery { Email = email });
+            if (currentUser == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login", "Login");
+            }
+
+            // Only managers can reject proposals
+            if (currentUser.Role != UserRole.Manager)
+            {
+                return Forbid();
+            }
+
+            await _service.Handle(new RejectProposalCommand
+            {
+                ProposalId = proposalId,
+                ProcessedByUserId = currentUser.Id
+            });
+
+            var redirectParams = new Dictionary<string, object> { { "id", employeeId } };
+            if (!string.IsNullOrEmpty(month))
+            {
+                redirectParams["month"] = month;
+            }
+
+            return RedirectToAction(nameof(EmployeeDetail), redirectParams);
         }
 
         [AllowAnonymous]

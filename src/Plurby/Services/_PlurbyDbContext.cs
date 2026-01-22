@@ -17,5 +17,6 @@ namespace Plurby.Services
 
         public DbSet<User> Users { get; set; }
         public DbSet<WorkEntry> WorkEntries { get; set; }
+        public DbSet<WorkEntryProposal> WorkEntryProposals { get; set; }
     }
 }
