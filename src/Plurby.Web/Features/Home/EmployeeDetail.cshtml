@@ -133,7 +133,15 @@
                                                 <i class="bi bi-exclamation-triangle"></i> Proposta in attesa
                                             </span>
                                         }
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="openEditModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")', '@Model.User.Id', '@(entry.HasPendingProposal ? "true" : "false")', '@(entry.ProposalId?.ToString() ?? "")', '@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")', '@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')">
+                                        <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                data-entry-id="@entry.Id"
+                                                data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
+                                                data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                data-employee-id="@Model.User.Id"
+                                                data-has-proposal="@(entry.HasPendingProposal ? "true" : "false")"
+                                                data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
+                                                data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
                                             <i class="bi bi-pencil"></i> Modifica
                                         </button>
                                     </td>
@@ -239,8 +247,134 @@
     </div>
 </div>
 
-@section Scripts {
+@section scripts {
     <script>
+        // Define openEditModal function globally before DOMContentLoaded
+        function openEditModal(workEntryId, startTime, endTime, employeeId, hasProposal, proposalId, proposedStartTime, proposedEndTime) {
+            try {
+                const modalElement = document.getElementById('editWorkEntryModal');
+                if (!modalElement) {
+                    console.error('Modal element not found');
+                    return;
+                }
+
+                // Check if Bootstrap is available
+                if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+                    console.error('Bootstrap Modal is not available');
+                    return;
+                }
+
+                const workEntryIdInput = document.getElementById('workEntryId');
+                const employeeIdInput = document.getElementById('employeeId');
+                const currentStartTimeInput = document.getElementById('currentStartTime');
+                const currentEndTimeInput = document.getElementById('currentEndTime');
+                
+                if (workEntryIdInput) workEntryIdInput.value = workEntryId;
+                if (employeeIdInput) employeeIdInput.value = employeeId;
+                
+                // Set current values (read-only)
+                if (currentStartTimeInput) {
+                    currentStartTimeInput.value = new Date(startTime).toLocaleString('it-IT');
+                }
+                if (currentEndTimeInput) {
+                    currentEndTimeInput.value = endTime && endTime.trim() !== '' 
+                        ? new Date(endTime).toLocaleString('it-IT') 
+                        : '-';
+                }
+                
+                const hasProposalBool = hasProposal === 'true';
+                const proposalAlert = document.getElementById('proposalAlert');
+                const proposalButtons = document.getElementById('proposalButtons');
+                
+                if (hasProposalBool && proposalId) {
+                    // Show proposal alert
+                    if (proposalAlert) proposalAlert.classList.remove('d-none');
+                    const proposedStartTimeDisplay = document.getElementById('proposedStartTimeDisplay');
+                    const proposedEndTimeDisplay = document.getElementById('proposedEndTimeDisplay');
+                    
+                    if (proposedStartTimeDisplay) {
+                        proposedStartTimeDisplay.textContent = proposedStartTime 
+                            ? new Date(proposedStartTime).toLocaleString('it-IT')
+                            : '-';
+                    }
+                    if (proposedEndTimeDisplay) {
+                        proposedEndTimeDisplay.textContent = proposedEndTime && proposedEndTime.trim() !== ''
+                            ? new Date(proposedEndTime).toLocaleString('it-IT')
+                            : '-';
+                    }
+                    
+                    // Show proposal buttons
+                    if (proposalButtons) proposalButtons.classList.remove('d-none');
+                    const acceptProposalIdInput = document.getElementById('acceptProposalId');
+                    const acceptEmployeeIdInput = document.getElementById('acceptEmployeeId');
+                    const rejectProposalIdInput = document.getElementById('rejectProposalId');
+                    const rejectEmployeeIdInput = document.getElementById('rejectEmployeeId');
+                    
+                    if (acceptProposalIdInput) acceptProposalIdInput.value = proposalId;
+                    if (acceptEmployeeIdInput) acceptEmployeeIdInput.value = employeeId;
+                    if (rejectProposalIdInput) rejectProposalIdInput.value = proposalId;
+                    if (rejectEmployeeIdInput) rejectEmployeeIdInput.value = employeeId;
+                    
+                    // Pre-fill with proposed values
+                    const startTimeInput = document.getElementById('startTime');
+                    const endTimeInput = document.getElementById('endTime');
+                    const clearEndTimeCheckbox = document.getElementById('clearEndTime');
+                    
+                    if (startTimeInput) {
+                        startTimeInput.value = proposedStartTime || startTime;
+                    }
+                    
+                    if (endTimeInput && clearEndTimeCheckbox) {
+                        if (proposedEndTime && proposedEndTime.trim() !== '') {
+                            endTimeInput.value = proposedEndTime;
+                            endTimeInput.disabled = false;
+                            clearEndTimeCheckbox.checked = false;
+                        } else if (endTime && endTime.trim() !== '') {
+                            endTimeInput.value = endTime;
+                            endTimeInput.disabled = false;
+                            clearEndTimeCheckbox.checked = false;
+                        } else {
+                            endTimeInput.value = '';
+                            endTimeInput.disabled = true;
+                            clearEndTimeCheckbox.checked = true;
+                        }
+                    }
+                } else {
+                    // Hide proposal alert and buttons
+                    if (proposalAlert) proposalAlert.classList.add('d-none');
+                    if (proposalButtons) proposalButtons.classList.add('d-none');
+                    
+                    // Set current values as editable
+                    const startTimeInput = document.getElementById('startTime');
+                    const endTimeInput = document.getElementById('endTime');
+                    const clearEndTimeCheckbox = document.getElementById('clearEndTime');
+                    
+                    if (startTimeInput) {
+                        startTimeInput.value = startTime;
+                    }
+                    
+                    if (endTimeInput && clearEndTimeCheckbox) {
+                        if (endTime && endTime.trim() !== '') {
+                            endTimeInput.value = endTime;
+                            endTimeInput.disabled = false;
+                            clearEndTimeCheckbox.checked = false;
+                        } else {
+                            endTimeInput.value = '';
+                            endTimeInput.disabled = true;
+                            clearEndTimeCheckbox.checked = true;
+                        }
+                    }
+                }
+                
+                // Initialize and show modal
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            } catch (error) {
+                console.error('Error opening edit modal:', error);
+                alert('Si è verificato un errore nell\'apertura della finestra di modifica. Controlla la console per i dettagli.');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const hourlyRateInput = document.getElementById('hourlyRate');
             const monthlyPayElement = document.getElementById('monthlyPay');
@@ -322,81 +456,24 @@
                     }
                 });
             }
-        });
 
-        function openEditModal(workEntryId, startTime, endTime, employeeId, hasProposal, proposalId, proposedStartTime, proposedEndTime) {
-            document.getElementById('workEntryId').value = workEntryId;
-            document.getElementById('employeeId').value = employeeId;
-            
-            // Set current values (read-only)
-            document.getElementById('currentStartTime').value = new Date(startTime).toLocaleString('it-IT');
-            document.getElementById('currentEndTime').value = endTime && endTime.trim() !== '' 
-                ? new Date(endTime).toLocaleString('it-IT') 
-                : '-';
-            
-            const hasProposalBool = hasProposal === 'true';
-            const proposalAlert = document.getElementById('proposalAlert');
-            const proposalButtons = document.getElementById('proposalButtons');
-            
-            if (hasProposalBool && proposalId) {
-                // Show proposal alert
-                proposalAlert.classList.remove('d-none');
-                document.getElementById('proposedStartTimeDisplay').textContent = proposedStartTime 
-                    ? new Date(proposedStartTime).toLocaleString('it-IT')
-                    : '-';
-                document.getElementById('proposedEndTimeDisplay').textContent = proposedEndTime && proposedEndTime.trim() !== ''
-                    ? new Date(proposedEndTime).toLocaleString('it-IT')
-                    : '-';
-                
-                // Show proposal buttons
-                proposalButtons.classList.remove('d-none');
-                document.getElementById('acceptProposalId').value = proposalId;
-                document.getElementById('acceptEmployeeId').value = employeeId;
-                document.getElementById('rejectProposalId').value = proposalId;
-                document.getElementById('rejectEmployeeId').value = employeeId;
-                
-                // Pre-fill with proposed values
-                document.getElementById('startTime').value = proposedStartTime || startTime;
-                const endTimeInput = document.getElementById('endTime');
-                const clearEndTimeCheckbox = document.getElementById('clearEndTime');
-                
-                if (proposedEndTime && proposedEndTime.trim() !== '') {
-                    endTimeInput.value = proposedEndTime;
-                    endTimeInput.disabled = false;
-                    clearEndTimeCheckbox.checked = false;
-                } else if (endTime && endTime.trim() !== '') {
-                    endTimeInput.value = endTime;
-                    endTimeInput.disabled = false;
-                    clearEndTimeCheckbox.checked = false;
-                } else {
-                    endTimeInput.value = '';
-                    endTimeInput.disabled = true;
-                    clearEndTimeCheckbox.checked = true;
-                }
-            } else {
-                // Hide proposal alert and buttons
-                proposalAlert.classList.add('d-none');
-                proposalButtons.classList.add('d-none');
-                
-                // Set current values as editable
-                document.getElementById('startTime').value = startTime;
-                const endTimeInput = document.getElementById('endTime');
-                const clearEndTimeCheckbox = document.getElementById('clearEndTime');
-                
-                if (endTime && endTime.trim() !== '') {
-                    endTimeInput.value = endTime;
-                    endTimeInput.disabled = false;
-                    clearEndTimeCheckbox.checked = false;
-                } else {
-                    endTimeInput.value = '';
-                    endTimeInput.disabled = true;
-                    clearEndTimeCheckbox.checked = true;
-                }
-            }
-            
-            const modal = new bootstrap.Modal(document.getElementById('editWorkEntryModal'));
-            modal.show();
-        }
+            // Attach event listeners to edit buttons using data attributes
+            const editButtons = document.querySelectorAll('.edit-entry-btn');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const entryId = this.getAttribute('data-entry-id');
+                    const startTime = this.getAttribute('data-start-time');
+                    const endTime = this.getAttribute('data-end-time') || '';
+                    const employeeId = this.getAttribute('data-employee-id');
+                    const hasProposal = this.getAttribute('data-has-proposal') || 'false';
+                    const proposalId = this.getAttribute('data-proposal-id') || '';
+                    const proposedStartTime = this.getAttribute('data-proposed-start-time') || '';
+                    const proposedEndTime = this.getAttribute('data-proposed-end-time') || '';
+                    
+                    openEditModal(entryId, startTime, endTime, employeeId, hasProposal, proposalId, proposedStartTime, proposedEndTime);
+                });
+            });
+        });
     </script>
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
