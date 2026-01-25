@@ -1,5 +1,6 @@
 @model Plurby.Web.Features.Home.EmployeeDashboardViewModel
 @using Plurby.Web.Areas
+@using Plurby.Web.Infrastructure
 @{
     var identitaCorrente = ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] as IdentitaViewModel;
     var userName = (identitaCorrente?.FirstName != null && identitaCorrente?.LastName != null) 
@@ -37,18 +38,18 @@
 
     <hr />
 
-    <!-- Today's Entries Section -->
+    <!-- Voci di oggi -->
     @if (Model.TodayEntries.Any())
     {
         <div class="mb-4">
-            <h4 class="mb-3">Voci di lavoro di oggi</h4>
+            <h4 class="mb-3">Lavoro di oggi</h4>
             <div class="card">
                 <div class="card-body p-0">
                     <table class="table table-striped mb-0">
                         <thead>
                             <tr>
-                                <th>Ora di inizio</th>
-                                <th>Ora di fine</th>
+                                <th>Inizio</th>
+                                <th>Fine</th>
                                 <th>Durata</th>
                             </tr>
                         </thead>
@@ -56,9 +57,9 @@
                             @foreach (var entry in Model.TodayEntries)
                             {
                                 <tr>
-                                    <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
-                                    <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
-                                    <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
+                                    <td>@entry.StartTime.ToLocalTime().ToString("HH:mm")</td>
+                                    <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("HH:mm") : "-")</td>
+                                    <td>@TimeFormatter.FormatItalian(entry.Duration)</td>
                                 </tr>
                             }
                         </tbody>
@@ -86,11 +87,11 @@
                     <div class="card bg-light mb-3">
                         <div class="card-body">
                             <div class="row mb-2">
-                                <div class="col-5"><strong>Ora di inizio:</strong></div>
+                                <div class="col-5"><strong>Inizio:</strong></div>
                                 <div class="col-7" id="modalStartTime">@Model.Status.StartTime.Value.ToLocalTime().ToString("g")</div>
                             </div>
                             <div class="row mb-2">
-                                <div class="col-5"><strong>Ora di fine:</strong></div>
+                                <div class="col-5"><strong>Fine:</strong></div>
                                 <div class="col-7" id="modalEndTime">-</div>
                             </div>
                             <div class="row">
@@ -120,6 +121,20 @@
             var startTime = new Date('@Model.Status.StartTime.Value.ToString("o")');
             var timerElement = document.getElementById('timer');
 
+            function formatItalianTime(hours, minutes) {
+                var parts = [];
+                if (hours > 0) {
+                    parts.push(hours + " " + (hours === 1 ? "ora" : "ore"));
+                }
+                if (minutes > 0) {
+                    parts.push(minutes + " minuti");
+                }
+                if (parts.length === 0) {
+                    return "0 minuti";
+                }
+                return parts.join(" e ");
+            }
+
             function updateTimer() {
                 var now = new Date();
                 var diff = now - startTime;
@@ -128,10 +143,7 @@
                 var minutes = Math.floor((diff / (1000 * 60)) % 60);
                 var hours = Math.floor((diff / (1000 * 60 * 60)));
 
-                timerElement.textContent = 
-                    (hours < 10 ? "0" + hours : hours) + ":" + 
-                    (minutes < 10 ? "0" + minutes : minutes) + ":" + 
-                    (seconds < 10 ? "0" + seconds : seconds);
+                timerElement.textContent = formatItalianTime(hours, minutes);
             }
 
             setInterval(updateTimer, 1000);
@@ -144,23 +156,17 @@
                     var now = new Date();
                     var diff = now - startTime;
                     
-                    var seconds = Math.floor((diff / 1000) % 60);
                     var minutes = Math.floor((diff / (1000 * 60)) % 60);
                     var hours = Math.floor((diff / (1000 * 60 * 60)));
                     
-                    var durationStr = 
-                        (hours < 10 ? "0" + hours : hours) + ":" + 
-                        (minutes < 10 ? "0" + minutes : minutes) + ":" + 
-                        (seconds < 10 ? "0" + seconds : seconds);
-                    
-                    // Format date to match the format used in the app (g format: M/d/yyyy h:mm AM/PM or dd/MM/yyyy HH:mm based on locale)
+                    // Format date to match the format used in the app
                     var day = String(now.getDate()).padStart(2, '0');
                     var month = String(now.getMonth() + 1).padStart(2, '0');
                     var year = now.getFullYear();
-                    var hours = String(now.getHours()).padStart(2, '0');
-                    var minutes = String(now.getMinutes()).padStart(2, '0');
-                    document.getElementById('modalEndTime').textContent = day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
-                    document.getElementById('modalDuration').textContent = durationStr;
+                    var hoursClock = String(now.getHours()).padStart(2, '0');
+                    var minutesClock = String(now.getMinutes()).padStart(2, '0');
+                    document.getElementById('modalEndTime').textContent = day + '/' + month + '/' + year + ' ' + hoursClock + ':' + minutesClock;
+                    document.getElementById('modalDuration').textContent = formatItalianTime(hours, minutes);
                 });
             }
         });

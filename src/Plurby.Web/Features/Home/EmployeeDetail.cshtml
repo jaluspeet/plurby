@@ -1,5 +1,6 @@
 @model Plurby.Web.Features.Home.EmployeeDetailViewModel
 @using System.Linq
+@using Plurby.Web.Infrastructure
 @{
     ViewData["Title"] = $"Storico: {Model.User.FirstName} {Model.User.LastName}";
     
@@ -16,6 +17,11 @@
     var selectedMonthEntries = Model.History
         .Where(e => e.StartTime.Year * 100 + e.StartTime.Month == monthFilter)
         .OrderByDescending(e => e.StartTime)
+        .ToList();
+    
+    var groupedByDay = selectedMonthEntries
+        .GroupBy(e => e.StartTime.Date)
+        .OrderByDescending(g => g.Key)
         .ToList();
     
     double selectedMonthHours = 0;
@@ -101,74 +107,87 @@
         </div>
     }
 
-    <!-- Tabella entries per mese -->
+    <!-- Entries raggruppate per giorno -->
     @if (selectedMonthEntries.Any())
     {
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Entries lavoro - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
-                @if (ViewData["IsManager"] as bool? == true)
-                {
-                    <button type="button" class="btn btn-success btn-sm" onclick="openAddNewEntryModal()">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        Aggiungi entry
-                    </button>
-                }
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>Ora inizio</th>
-                            <th>Ora fine</th>
-                            <th>Durata</th>
-                            @if (ViewData["IsManager"] as bool? == true)
-                            {
-                                <th>Azioni</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var entry in selectedMonthEntries)
-                        {
-                            <tr class="@(entry.HasPendingProposal ? "table-warning" : "")">
-                                <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
-                                <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
-                                <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Lavoro - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
+            @if (ViewData["IsManager"] as bool? == true)
+            {
+                <button type="button" class="btn btn-success btn-sm" onclick="openAddNewEntryModal()">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Aggiungi
+                </button>
+            }
+        </div>
+
+        @foreach (var dayGroup in groupedByDay)
+        {
+            var dayTotalHours = dayGroup.Where(e => e.Duration.HasValue).Sum(e => e.Duration.Value.TotalHours);
+            
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-calendar3 me-2"></i>
+                        @dayGroup.Key.ToString("dddd d MMMM yyyy")
+                        <span class="badge bg-primary ms-2">@TimeFormatter.FormatItalian(TimeSpan.FromHours(dayTotalHours))</span>
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Inizio</th>
+                                <th>Fine</th>
+                                <th>Durata</th>
                                 @if (ViewData["IsManager"] as bool? == true)
                                 {
-                                    <td>
-                                        @if (entry.HasPendingProposal)
-                                        {
-                                            <span class="badge bg-warning text-dark me-2">
-                                                <i class="bi bi-exclamation-triangle"></i> Proposta in attesa
-                                            </span>
-                                        }
-                                        <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
-                                                data-entry-id="@entry.Id"
-                                                data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
-                                                data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
-                                                data-employee-id="@Model.User.Id"
-                                                data-has-proposal="@(entry.HasPendingProposal ? "true" : "false")"
-                                                data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
-                                                data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
-                                                data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
-                                            <i class="bi bi-pencil"></i> Modifica
-                                        </button>
-                                    </td>
+                                    <th>Azioni</th>
                                 }
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in dayGroup.OrderByDescending(e => e.StartTime))
+                            {
+                                <tr class="@(entry.HasPendingProposal ? "table-warning" : "")">
+                                    <td>@entry.StartTime.ToLocalTime().ToString("HH:mm")</td>
+                                    <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("HH:mm") : "-")</td>
+                                    <td>@TimeFormatter.FormatItalian(entry.Duration)</td>
+                                    @if (ViewData["IsManager"] as bool? == true)
+                                    {
+                                        <td>
+                                            @if (entry.HasPendingProposal)
+                                            {
+                                                <span class="badge bg-warning text-dark me-2">
+                                                    <i class="bi bi-exclamation-triangle"></i> Proposta
+                                                </span>
+                                            }
+                                            <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                    data-entry-id="@entry.Id"
+                                                    data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
+                                                    data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                    data-employee-id="@Model.User.Id"
+                                                    data-has-proposal="@(entry.HasPendingProposal ? "true" : "false")"
+                                                    data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
+                                                    data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                    data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
+                                                <i class="bi bi-pencil"></i> Modifica
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        }
     }
     else
     {
         <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
-            Nessuna entry di lavoro trovata per @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
+            Nessuna voce di lavoro trovata per @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy")).
         </div>
     }
 </div>
@@ -178,7 +197,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editWorkEntryModalLabel">Modifica Work Entry</h5>
+                <h5 class="modal-title" id="editWorkEntryModalLabel">Modifica voce</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editWorkEntryForm" method="post" asp-action="EditWorkEntry">
@@ -190,36 +209,36 @@
                     
                     <!-- Proposal alert -->
                     <div id="proposalAlert" class="alert alert-warning d-none">
-                        <h6><i class="bi bi-exclamation-triangle me-2"></i>Proposta di modifica in attesa</h6>
-                        <p class="mb-2">Un dipendente ha proposto le seguenti modifiche:</p>
+                        <h6><i class="bi bi-exclamation-triangle me-2"></i>Proposta in attesa</h6>
+                        <p class="mb-2">Modifiche proposte:</p>
                         <ul class="mb-2">
-                            <li><strong>Ora inizio proposta:</strong> <span id="proposedStartTimeDisplay"></span></li>
-                            <li><strong>Ora fine proposta:</strong> <span id="proposedEndTimeDisplay"></span></li>
+                            <li><strong>Inizio:</strong> <span id="proposedStartTimeDisplay"></span></li>
+                            <li><strong>Fine:</strong> <span id="proposedEndTimeDisplay"></span></li>
                         </ul>
-                        <p class="mb-0">Puoi accettare la proposta, rifiutarla, o modificare manualmente i valori.</p>
+                        <p class="mb-0">Accetta, rifiuta o modifica manualmente.</p>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-3">Valori attuali</h6>
+                            <h6 class="text-muted mb-3">Attuali</h6>
                             <div class="mb-3">
-                                <label class="form-label">Ora inizio attuale</label>
+                                <label class="form-label">Inizio attuale</label>
                                 <input type="text" class="form-control" id="currentStartTime" readonly style="background-color: #e9ecef;" />
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Ora fine attuale</label>
+                                <label class="form-label">Fine attuale</label>
                                 <input type="text" class="form-control" id="currentEndTime" readonly style="background-color: #e9ecef;" />
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-3">Nuovi valori</h6>
+                            <h6 class="text-muted mb-3">Nuovi</h6>
                             <div class="mb-3">
-                                <label for="startTime" class="form-label">Ora inizio</label>
+                                <label for="startTime" class="form-label">Inizio</label>
                                 <input type="datetime-local" class="form-control" id="startTime" name="startTime" required />
                             </div>
                             
                             <div class="mb-3">
-                                <label for="endTime" class="form-label">Ora fine</label>
+                                <label for="endTime" class="form-label">Fine</label>
                                 <input type="datetime-local" class="form-control" id="endTime" name="endTime" required />
                             </div>
                         </div>
@@ -259,7 +278,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addNewEntryModalLabel">Aggiungi Nuova Work Entry</h5>
+                    <h5 class="modal-title" id="addNewEntryModalLabel">Aggiungi nuova voce</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addNewEntryForm" method="post" asp-action="AddNewWorkEntry">
@@ -284,7 +303,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                        <button type="submit" class="btn btn-success">Aggiungi entry</button>
+                        <button type="submit" class="btn btn-success">Aggiungi</button>
                     </div>
                 </form>
             </div>
