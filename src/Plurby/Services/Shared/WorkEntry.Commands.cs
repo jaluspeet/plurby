@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,6 +29,27 @@ namespace Plurby.Services.Shared
         public Guid ProposedByUserId { get; set; }
         public DateTime ProposedStartTime { get; set; }
         public DateTime? ProposedEndTime { get; set; }
+    }
+
+    public class ProposeNewWorkEntryCommand
+    {
+        public Guid ProposedByUserId { get; set; }
+        public DateTime ProposedStartTime { get; set; }
+        public DateTime ProposedEndTime { get; set; }
+    }
+
+    public class AddNewWorkEntryCommand
+    {
+        public Guid UserId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+    }
+
+    public class UpdateNewProposalCommand
+    {
+        public Guid ProposalId { get; set; }
+        public DateTime ProposedStartTime { get; set; }
+        public DateTime ProposedEndTime { get; set; }
     }
 
     public class AcceptProposalCommand
@@ -123,6 +145,70 @@ namespace Plurby.Services.Shared
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task Handle(ProposeNewWorkEntryCommand cmd)
+        {
+            // Create a new work entry proposal (WorkEntryId is null for new entries)
+            var proposal = new WorkEntryProposal
+            {
+                WorkEntryId = null, // Indicates this is a proposal for a new work entry
+                ProposedByUserId = cmd.ProposedByUserId,
+                ProposedStartTime = cmd.ProposedStartTime.ToUniversalTime(),
+                ProposedEndTime = cmd.ProposedEndTime.ToUniversalTime(),
+                Status = ProposalStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _dbContext.WorkEntryProposals.Add(proposal);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task Handle(AddNewWorkEntryCommand cmd)
+        {
+            var entry = new WorkEntry
+            {
+                UserId = cmd.UserId,
+                StartTime = cmd.StartTime.ToUniversalTime(),
+                EndTime = cmd.EndTime.ToUniversalTime()
+            };
+
+            _dbContext.WorkEntries.Add(entry);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task Handle(UpdateNewProposalCommand cmd)
+        {
+            var proposal = await _dbContext.WorkEntryProposals
+                .FirstOrDefaultAsync(x => x.Id == cmd.ProposalId && x.Status == ProposalStatus.Pending);
+
+            if (proposal == null) return; // Proposal not found or already processed
+
+            // Update proposal
+            proposal.ProposedStartTime = cmd.ProposedStartTime.ToUniversalTime();
+            proposal.ProposedEndTime = cmd.ProposedEndTime.ToUniversalTime();
+            proposal.CreatedAt = DateTime.UtcNow; // Update to show it was recently modified
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<WorkEntryProposalDTO>> Query(WorkEntryProposalsQuery qry)
+        {
+            return await _dbContext.WorkEntryProposals
+                .Where(x => x.ProposedByUserId == qry.UserId)
+                .Select(x => new WorkEntryProposalDTO
+                {
+                    Id = x.Id,
+                    WorkEntryId = x.WorkEntryId,
+                    ProposedByUserId = x.ProposedByUserId,
+                    ProposedStartTime = x.ProposedStartTime,
+                    ProposedEndTime = x.ProposedEndTime,
+                    Status = x.Status,
+                    CreatedAt = x.CreatedAt,
+                    ProcessedAt = x.ProcessedAt,
+                    ProcessedByUserId = x.ProcessedByUserId
+                })
+                .ToListAsync();
+        }
+
         public async Task Handle(AcceptProposalCommand cmd)
         {
             var proposal = await _dbContext.WorkEntryProposals
@@ -131,9 +217,24 @@ namespace Plurby.Services.Shared
 
             if (proposal == null) return; // Proposal not found or already processed
 
-            // Update the work entry
-            proposal.WorkEntry.StartTime = proposal.ProposedStartTime;
-            proposal.WorkEntry.EndTime = proposal.ProposedEndTime;
+            if (proposal.WorkEntryId.HasValue)
+            {
+                // Update existing work entry
+                proposal.WorkEntry.StartTime = proposal.ProposedStartTime;
+                proposal.WorkEntry.EndTime = proposal.ProposedEndTime;
+            }
+            else
+            {
+                // Create new work entry from proposal
+                var newEntry = new WorkEntry
+                {
+                    UserId = proposal.ProposedByUserId,
+                    StartTime = proposal.ProposedStartTime,
+                    EndTime = proposal.ProposedEndTime
+                };
+
+                _dbContext.WorkEntries.Add(newEntry);
+            }
 
             // Mark proposal as accepted
             proposal.Status = ProposalStatus.Accepted;

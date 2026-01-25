@@ -329,9 +329,37 @@ namespace Plurby.Web.Features.Home
 
             // Verify the work entry belongs to the current user
             var history = await _service.Query(new WorkHistoryQuery { UserId = currentUser.Id });
-            if (!history.Any(x => x.Id == workEntryId))
+            var workEntry = history.FirstOrDefault(x => x.Id == workEntryId);
+            if (workEntry == null)
             {
                 return Forbid();
+            }
+
+            // Only allow proposing changes to finished entries (with end date)
+            if (!workEntry.EndTime.HasValue)
+            {
+                TempData["Error"] = "È possibile proporre modifiche solo per voci di lavoro completate (con ora di fine).";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            // Validate proposed dates
+            if (proposedStartTime > DateTime.Now)
+            {
+                TempData["Error"] = "L'ora di inizio proposta non può essere nel futuro.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            if (proposedEndTime.HasValue && proposedStartTime >= proposedEndTime.Value)
+            {
+                TempData["Error"] = "L'ora di inizio deve essere precedente all'ora di fine.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            // End time is now required for proposals
+            if (!proposedEndTime.HasValue)
+            {
+                TempData["Error"] = "L'ora di fine è obbligatoria per le proposte di modifica.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
             }
 
             await _service.Handle(new ProposeWorkEntryChangeCommand
@@ -347,7 +375,139 @@ namespace Plurby.Web.Features.Home
                 return RedirectToAction(nameof(EmployeeHistory), new { month = month });
             }
 
+            TempData["Success"] = "Proposta di modifica inviata con successo. In attesa di approvazione.";
             return RedirectToAction(nameof(EmployeeHistory));
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> ProposeNewWorkEntry(DateTime startTime, DateTime endTime, string month = null)
+        {
+            var (currentUser, redirectResult) = await GetCurrentUserOrRedirect();
+            if (redirectResult != null)
+                return redirectResult;
+
+            // Only employees can propose new entries (managers can add directly)
+            if (currentUser.Role != UserRole.Employee)
+            {
+                return Forbid();
+            }
+
+            // Validate proposed dates
+            if (startTime > DateTime.Now)
+            {
+                TempData["Error"] = "L'ora di inizio non può essere nel futuro.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            if (startTime >= endTime)
+            {
+                TempData["Error"] = "L'ora di inizio deve essere precedente all'ora di fine.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            // Use service to create new work entry proposal
+            await _service.Handle(new ProposeNewWorkEntryCommand
+            {
+                ProposedByUserId = currentUser.Id,
+                ProposedStartTime = startTime,
+                ProposedEndTime = endTime
+            });
+
+            TempData["Success"] = "Proposta di nuova voce di lavoro inviata con successo. In attesa di approvazione.";
+
+            if (!string.IsNullOrEmpty(month))
+            {
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            return RedirectToAction(nameof(EmployeeHistory));
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> EditNewProposal(Guid editProposalId, DateTime startTime, DateTime endTime, string month = null)
+        {
+            var (currentUser, redirectResult) = await GetCurrentUserOrRedirect();
+            if (redirectResult != null)
+                return redirectResult;
+
+            // Only employees can edit their own proposals
+            if (currentUser.Role != UserRole.Employee)
+            {
+                return Forbid();
+            }
+
+            // Find proposal using service
+            var proposals = await _service.Query(new WorkEntryProposalsQuery { UserId = currentUser.Id });
+            var proposal = proposals.FirstOrDefault(x => x.Id == editProposalId && x.Status == ProposalStatus.Pending);
+
+            if (proposal == null)
+            {
+                TempData["Error"] = "Proposta non trovata o già processata.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            // Validate dates
+            if (startTime > DateTime.Now)
+            {
+                TempData["Error"] = "L'ora di inizio non può essere nel futuro.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            if (startTime >= endTime)
+            {
+                TempData["Error"] = "L'ora di inizio deve essere precedente all'ora di fine.";
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            // Update proposal using service
+            await _service.Handle(new UpdateNewProposalCommand
+            {
+                ProposalId = editProposalId,
+                ProposedStartTime = startTime,
+                ProposedEndTime = endTime
+            });
+
+            TempData["Success"] = "Proposta aggiornata con successo. In attesa di approvazione.";
+
+            if (!string.IsNullOrEmpty(month))
+            {
+                return RedirectToAction(nameof(EmployeeHistory), new { month = month });
+            }
+
+            return RedirectToAction(nameof(EmployeeHistory));
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> AddNewWorkEntry(Guid employeeId, DateTime startTime, DateTime endTime, string month = null)
+        {
+            var (currentUser, redirectResult) = await GetCurrentUserOrRedirect();
+            if (redirectResult != null)
+                return redirectResult;
+
+            // Only managers can add new work entries directly
+            if (currentUser.Role != UserRole.Manager)
+            {
+                return Forbid();
+            }
+
+            // Validate dates
+            if (startTime >= endTime)
+            {
+                TempData["Error"] = "L'ora di inizio deve essere precedente all'ora di fine.";
+                return RedirectToAction(nameof(EmployeeDetail), new { id = employeeId, month = month });
+            }
+
+            // Use service to create new work entry
+            await _service.Handle(new AddNewWorkEntryCommand
+            {
+                UserId = employeeId,
+                StartTime = startTime,
+                EndTime = endTime
+            });
+
+            TempData["Success"] = "Nuova voce di lavoro aggiunta con successo.";
+
+            return RedirectToAction(nameof(EmployeeDetail), new { id = employeeId, month = month });
         }
 
         [HttpPost]

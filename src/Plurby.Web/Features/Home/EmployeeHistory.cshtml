@@ -1,7 +1,17 @@
 @model Plurby.Web.Features.Home.EmployeeHistoryViewModel
 @using Plurby.Web.Areas
 @using System.Linq
+@using Plurby.Services.Shared
 @{
+    @functions {
+        public string GetRowClass(WorkHistoryDTO entry)
+        {
+            if (entry.HasPendingProposal) return "table-warning";
+            if (entry.IsNewEntryProposal) return "table-info";
+            return "";
+        }
+    }
+    
     var identitaCorrente = ViewData[IdentitaViewModel.VIEWDATA_IDENTITACORRENTE_KEY] as IdentitaViewModel;
     var userName = (identitaCorrente?.FirstName != null && identitaCorrente?.LastName != null) 
         ? $"{identitaCorrente.FirstName} {identitaCorrente.LastName}" 
@@ -77,10 +87,38 @@
         </div>
 
         <!-- Pulsante torna alla dashboard con icona -->
-        <a asp-action="Index" class="btn btn-secondary d-flex align-items-center">
+        <a asp-action="Index" class="btn btn-secondary d-flex align-items-center me-2">
             <i class="bi bi-speedometer2 me-2"></i>
             Torna alla dashboard
         </a>
+        
+        @if (ViewData["IsEmployee"] as bool? == true)
+        {
+            <button type="button" class="btn btn-success d-flex align-items-center" onclick="openAddEntryModal()">
+                <i class="bi bi-plus-circle me-2"></i>
+                Aggiungi voce di lavoro
+            </button>
+        }
+    </div>
+
+    <!-- Error message display -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     </div>
 
     <!-- Voci di lavoro filtrate per mese selezionato -->
@@ -108,22 +146,49 @@
                     <tbody>
                         @foreach (var entry in selectedMonthEntries)
                         {
-                            <tr class="@(entry.HasPendingProposal ? "table-warning" : "")">
-                                <td>@entry.StartTime.ToLocalTime().ToString("g")</td>
+                            <tr class="@GetRowClass(entry)">
+                                <td>
+                                    @entry.StartTime.ToLocalTime().ToString("g")
+                                    @if (entry.IsNewEntryProposal)
+                                    {
+                                        <span class="badge bg-info ms-2">
+                                            <i class="bi bi-plus-circle"></i> Nuova proposta
+                                        </span>
+                                    }
+                                </td>
                                 <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("g") : "-")</td>
                                 <td>@(entry.Duration.HasValue ? entry.Duration.Value.ToString(@"hh\:mm\:ss") : "-")</td>
                                 @if (ViewData["IsEmployee"] as bool? == true)
                                 {
                                     <td>
-                                        @if (entry.HasPendingProposal)
+                                        @if (entry.IsNewEntryProposal)
                                         {
                                             <span class="badge bg-warning text-dark me-2">
                                                 <i class="bi bi-clock-history"></i> Proposta in attesa
                                             </span>
+                                            <button type="button" class="btn btn-sm btn-warning" onclick="openEditNewProposalModal('@entry.ProposalId', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')">
+                                                <i class="bi bi-pencil"></i> Modifica proposta
+                                            </button>
                                         }
-                                        <button type="button" class="btn btn-sm btn-info" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')">
-                                            <i class="bi bi-pencil"></i> @(entry.HasPendingProposal ? "Modifica proposta" : "Proponi modifica")
-                                        </button>
+                                        else if (entry.HasPendingProposal)
+                                        {
+                                            <span class="badge bg-warning text-dark me-2">
+                                                <i class="bi bi-clock-history"></i> Proposta in attesa
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-info" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")')">
+                                                <i class="bi bi-pencil"></i> Modifica proposta
+                                            </button>
+                                        }
+                                        else if (entry.EndTime.HasValue)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-info" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")')">
+                                                <i class="bi bi-pencil"></i> Proponi modifica
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
                                     </td>
                                 }
                             </tr>
@@ -152,8 +217,8 @@
                     <h5 class="modal-title" id="proposeWorkEntryModalLabel">Proponi Modifica Work Entry</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="proposeWorkEntryForm" method="post" asp-action="ProposeWorkEntryChange">
-                    <div class="modal-body">
+                <form id="proposeWorkEntryForm" method="post" asp-action="ProposeWorkEntryChange" v-on:submit.prevent="submitProposal">
+                    <div class="modal-body" id="proposeModalVueApp">
                         <input type="hidden" id="proposeWorkEntryId" name="workEntryId" />
                         <input type="hidden" id="proposeMonth" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
                         
@@ -164,23 +229,70 @@
                         
                         <div class="mb-3">
                             <label for="proposeStartTime" class="form-label">Ora inizio proposta</label>
-                            <input type="datetime-local" class="form-control" id="proposeStartTime" name="proposedStartTime" required />
+                            <input type="datetime-local" class="form-control" id="proposeStartTime" name="proposedStartTime" required 
+                                   v-model="proposal.startTime" v-on:input="validateDates" 
+                                   :class="{'is-invalid': errors.startTime}" />
+                            <div class="invalid-feedback" v-if="errors.startTime" v-text="errors.startTime"></div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="proposeEndTime" class="form-label">Ora fine proposta (opzionale)</label>
-                            <input type="datetime-local" class="form-control" id="proposeEndTime" name="proposedEndTime" />
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" id="proposeClearEndTime" />
-                                <label class="form-check-label" for="proposeClearEndTime">
-                                    Rimuovi ora fine
-                                </label>
-                            </div>
+                            <label for="proposeEndTime" class="form-label">Ora fine proposta</label>
+                            <input type="datetime-local" class="form-control" id="proposeEndTime" name="proposedEndTime" required 
+                                   v-model="proposal.endTime" v-on:input="validateDates"
+                                   :class="{'is-invalid': errors.endTime}" />
+                            <div class="invalid-feedback" v-if="errors.endTime" v-text="errors.endTime"></div>
                         </div>
+                        
+                        <div class="alert alert-danger" v-if="errors.general" v-text="errors.general"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                        <button type="submit" class="btn btn-primary">Invia proposta</button>
+                        <button type="submit" class="btn btn-primary" :disabled="!isValid">Invia proposta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal per aggiungere nuova work entry -->
+    <div class="modal fade" id="addWorkEntryModal" tabindex="-1" aria-labelledby="addWorkEntryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addWorkEntryModalLabel">Aggiungi Voce di Lavoro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addWorkEntryForm" method="post" asp-action="ProposeNewWorkEntry" v-on:submit.prevent="submitNewEntry">
+                    <div class="modal-body" id="addModalVueApp">
+                        <input type="hidden" id="addMonth" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                        <input type="hidden" id="editProposalId" name="editProposalId" />
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Aggiungi una nuova voce di lavoro. Un manager dovrà approvare la proposta.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="addStartTime" class="form-label">Ora inizio</label>
+                            <input type="datetime-local" class="form-control" id="addStartTime" name="startTime" required 
+                                   v-model="newEntry.startTime" v-on:input="validateNewDates" 
+                                   :class="{'is-invalid': newEntryErrors.startTime}" />
+                            <div class="invalid-feedback" v-if="newEntryErrors.startTime" v-text="newEntryErrors.startTime"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="addEndTime" class="form-label">Ora fine</label>
+                            <input type="datetime-local" class="form-control" id="addEndTime" name="endTime" required 
+                                   v-model="newEntry.endTime" v-on:input="validateNewDates"
+                                   :class="{'is-invalid': newEntryErrors.endTime}" />
+                            <div class="invalid-feedback" v-if="newEntryErrors.endTime" v-text="newEntryErrors.endTime"></div>
+                        </div>
+                        
+                        <div class="alert alert-danger" v-if="newEntryErrors.general" v-text="newEntryErrors.general"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-success" :disabled="!isNewEntryValid">Invia proposta</button>
                     </div>
                 </form>
             </div>
@@ -189,7 +301,272 @@
 }
 
 @section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script>
+        // Global variables for Vue apps
+        let proposeVueApp = null;
+        let addVueApp = null;
+
+        // Global function accessible to onclick handlers
+        function openProposeModal(workEntryId, startTime, endTime) {
+            document.getElementById('proposeWorkEntryId').value = workEntryId;
+            document.getElementById('proposeStartTime').value = startTime;
+            document.getElementById('proposeEndTime').value = endTime;
+            
+            // Initialize Vue app if not already done
+            if (!proposeVueApp) {
+                proposeVueApp = new Vue({
+                    el: '#proposeModalVueApp',
+                    data: {
+                        proposal: {
+                            startTime: startTime,
+                            endTime: endTime
+                        },
+                        errors: {
+                            startTime: '',
+                            endTime: '',
+                            general: ''
+                        }
+                    },
+                    computed: {
+                        isValid() {
+                            return this.proposal.startTime && 
+                                   this.proposal.endTime && 
+                                   !this.errors.startTime && 
+                                   !this.errors.endTime && 
+                                   !this.errors.general;
+                        }
+                    },
+                    methods: {
+                        validateDates() {
+                            this.errors.startTime = '';
+                            this.errors.endTime = '';
+                            this.errors.general = '';
+                            
+                            // Get values from inputs
+                            const startInput = document.getElementById('proposeStartTime');
+                            const endInput = document.getElementById('proposeEndTime');
+                            
+                            if (!startInput.value) {
+                                this.errors.startTime = "L'ora di inizio è obbligatoria";
+                                return;
+                            }
+                            
+                            if (!endInput.value) {
+                                this.errors.endTime = "L'ora di fine è obbligatoria";
+                                return;
+                            }
+                            
+                            const startDate = new Date(startInput.value);
+                            const endDate = new Date(endInput.value);
+                            
+                            // Check if dates are valid
+                            if (isNaN(startDate.getTime())) {
+                                this.errors.startTime = "Data di inizio non valida";
+                                return;
+                            }
+                            
+                            if (isNaN(endDate.getTime())) {
+                                this.errors.endTime = "Data di fine non valida";
+                                return;
+                            }
+                            
+                            // Check if start date is in the future
+                            if (startDate > new Date()) {
+                                this.errors.startTime = "L'ora di inizio non può essere nel futuro";
+                                return;
+                            }
+                            
+                            // Check if end date is before start date
+                            if (startDate >= endDate) {
+                                this.errors.endTime = "L'ora di fine deve essere successiva all'ora di inizio";
+                                return;
+                            }
+                        },
+                        
+                        submitProposal() {
+                            this.validateDates();
+                            if (this.isValid) {
+                                // Submit the form
+                                document.getElementById('proposeWorkEntryForm').submit();
+                            }
+                        }
+                    },
+                    mounted() {
+                        // Add event listeners to inputs
+                        const startInput = document.getElementById('proposeStartTime');
+                        const endInput = document.getElementById('proposeEndTime');
+                        
+                        if (startInput) {
+                            startInput.addEventListener('input', this.validateDates);
+                        }
+                        
+                        if (endInput) {
+                            endInput.addEventListener('input', this.validateDates);
+                        }
+                        
+                        // Initial validation
+                        this.validateDates();
+                    }
+                });
+            } else {
+                // Update existing Vue app with new values
+                proposeVueApp.proposal.startTime = startTime;
+                proposeVueApp.proposal.endTime = endTime;
+                proposeVueApp.validateDates();
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('proposeWorkEntryModal'));
+            modal.show();
+        }
+
+        // Global function for adding new entry
+        function openAddEntryModal() {
+            // Initialize Vue app if not already done
+            if (!addVueApp) {
+                addVueApp = new Vue({
+                    el: '#addModalVueApp',
+                    data: {
+                        newEntry: {
+                            startTime: '',
+                            endTime: ''
+                        },
+                        newEntryErrors: {
+                            startTime: '',
+                            endTime: '',
+                            general: ''
+                        }
+                    },
+                    computed: {
+                        isNewEntryValid() {
+                            return this.newEntry.startTime && 
+                                   this.newEntry.endTime && 
+                                   !this.newEntryErrors.startTime && 
+                                   !this.newEntryErrors.endTime && 
+                                   !this.newEntryErrors.general;
+                        }
+                    },
+                    methods: {
+                        validateNewDates() {
+                            this.newEntryErrors.startTime = '';
+                            this.newEntryErrors.endTime = '';
+                            this.newEntryErrors.general = '';
+                            
+                            // Get values from inputs
+                            const startInput = document.getElementById('addStartTime');
+                            const endInput = document.getElementById('addEndTime');
+                            
+                            if (!startInput.value) {
+                                this.newEntryErrors.startTime = "L'ora di inizio è obbligatoria";
+                                return;
+                            }
+                            
+                            if (!endInput.value) {
+                                this.newEntryErrors.endTime = "L'ora di fine è obbligatoria";
+                                return;
+                            }
+                            
+                            const startDate = new Date(startInput.value);
+                            const endDate = new Date(endInput.value);
+                            
+                            // Check if dates are valid
+                            if (isNaN(startDate.getTime())) {
+                                this.newEntryErrors.startTime = "Data di inizio non valida";
+                                return;
+                            }
+                            
+                            if (isNaN(endDate.getTime())) {
+                                this.newEntryErrors.endTime = "Data di fine non valida";
+                                return;
+                            }
+                            
+                            // Check if start date is in the future
+                            if (startDate > new Date()) {
+                                this.newEntryErrors.startTime = "L'ora di inizio non può essere nel futuro";
+                                return;
+                            }
+                            
+                            // Check if end date is before start date
+                            if (startDate >= endDate) {
+                                this.newEntryErrors.endTime = "L'ora di fine deve essere successiva all'ora di inizio";
+                                return;
+                            }
+                        },
+                        
+                        submitNewEntry() {
+                            this.validateNewDates();
+                            if (this.isNewEntryValid) {
+                                // Set proposal ID if editing
+                                if (window.editingNewProposalId) {
+                                    document.getElementById('editProposalId').value = window.editingNewProposalId;
+                                    // Change form action to edit existing proposal
+                                    document.getElementById('addWorkEntryForm').setAttribute('action', '/Home/EditNewProposal');
+                                } else {
+                                    document.getElementById('editProposalId').value = '';
+                                    // Reset form action
+                                    document.getElementById('addWorkEntryForm').setAttribute('action', '/Home/ProposeNewWorkEntry');
+                                }
+                                
+                                // Submit the form
+                                document.getElementById('addWorkEntryForm').submit();
+                            }
+                        }
+                    },
+                    mounted() {
+                        // Add event listeners to inputs
+                        const startInput = document.getElementById('addStartTime');
+                        const endInput = document.getElementById('addEndTime');
+                        
+                        if (startInput) {
+                            startInput.addEventListener('input', this.validateNewDates);
+                        }
+                        
+                        if (endInput) {
+                            endInput.addEventListener('input', this.validateNewDates);
+                        }
+                    }
+                });
+            } else {
+                // Reset form
+                addVueApp.newEntry.startTime = '';
+                addVueApp.newEntry.endTime = '';
+                addVueApp.validateNewDates();
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('addWorkEntryModal'));
+            modal.show();
+        }
+
+        // Global function for editing new entry proposals
+        function openEditNewProposalModal(proposalId, startTime, endTime) {
+            // For new entry proposals, we'll reuse the add modal but pre-fill with existing data
+            // Set a flag to indicate we're editing
+            window.editingNewProposalId = proposalId;
+            
+            if (!addVueApp) {
+                openAddEntryModal(); // This will create the Vue app
+            }
+            
+            // Pre-fill the form
+            addVueApp.newEntry.startTime = startTime;
+            addVueApp.newEntry.endTime = endTime;
+            addVueApp.validateNewDates();
+            
+            // Update modal title and button
+            const modalTitle = document.querySelector('#addWorkEntryModalLabel');
+            const submitButton = document.querySelector('#addModalVueApp .btn-success');
+            
+            if (modalTitle) modalTitle.textContent = 'Modifica Proposta Nuova Voce';
+            if (submitButton) {
+                submitButton.textContent = 'Aggiorna proposta';
+                submitButton.classList.remove('btn-success');
+                submitButton.classList.add('btn-warning');
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('addWorkEntryModal'));
+            modal.show();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Funzionalità selettore mese
             const prevMonthBtn = document.getElementById('prevMonth');
@@ -234,53 +611,7 @@
                     window.location.search = urlParams.toString();
                 });
             });
-
-            // Handle clear end time checkbox for propose modal
-            const proposeClearEndTimeCheckbox = document.getElementById('proposeClearEndTime');
-            const proposeEndTimeInput = document.getElementById('proposeEndTime');
-            
-            if (proposeClearEndTimeCheckbox && proposeEndTimeInput) {
-                proposeClearEndTimeCheckbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        proposeEndTimeInput.disabled = true;
-                        proposeEndTimeInput.value = '';
-                    } else {
-                        proposeEndTimeInput.disabled = false;
-                    }
-                });
-            }
-
-            // Handle form submission - ensure empty endTime is sent as empty string
-            const proposeWorkEntryForm = document.getElementById('proposeWorkEntryForm');
-            if (proposeWorkEntryForm) {
-                proposeWorkEntryForm.addEventListener('submit', function(e) {
-                    if (proposeEndTimeInput.disabled || !proposeEndTimeInput.value) {
-                        proposeEndTimeInput.value = '';
-                    }
-                });
-            }
         });
-
-        function openProposeModal(workEntryId, startTime, endTime) {
-            document.getElementById('proposeWorkEntryId').value = workEntryId;
-            document.getElementById('proposeStartTime').value = startTime;
-            
-            const proposeEndTimeInput = document.getElementById('proposeEndTime');
-            const proposeClearEndTimeCheckbox = document.getElementById('proposeClearEndTime');
-            
-            if (endTime && endTime.trim() !== '') {
-                proposeEndTimeInput.value = endTime;
-                proposeEndTimeInput.disabled = false;
-                proposeClearEndTimeCheckbox.checked = false;
-            } else {
-                proposeEndTimeInput.value = '';
-                proposeEndTimeInput.disabled = true;
-                proposeClearEndTimeCheckbox.checked = true;
-            }
-            
-            const modal = new bootstrap.Modal(document.getElementById('proposeWorkEntryModal'));
-            modal.show();
-        }
     </script>
 }
 

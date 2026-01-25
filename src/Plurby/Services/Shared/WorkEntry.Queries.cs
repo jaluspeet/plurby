@@ -21,6 +21,25 @@ namespace Plurby.Services.Shared
         public Guid? ProposalId { get; set; }
         public DateTime? ProposedStartTime { get; set; }
         public DateTime? ProposedEndTime { get; set; }
+        public bool IsNewEntryProposal { get; set; }
+    }
+
+    public class WorkEntryProposalsQuery
+    {
+        public Guid UserId { get; set; }
+    }
+
+    public class WorkEntryProposalDTO
+    {
+        public Guid Id { get; set; }
+        public Guid? WorkEntryId { get; set; }
+        public Guid ProposedByUserId { get; set; }
+        public DateTime ProposedStartTime { get; set; }
+        public DateTime? ProposedEndTime { get; set; }
+        public ProposalStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? ProcessedAt { get; set; }
+        public Guid? ProcessedByUserId { get; set; }
     }
 
     public class CurrentWorkStatusQuery
@@ -44,15 +63,20 @@ namespace Plurby.Services.Shared
                 .ToListAsync();
 
             var entryIds = entries.Select(x => x.Id).ToList();
-            var proposals = await _dbContext.WorkEntryProposals
-                .Where(x => entryIds.Contains(x.WorkEntryId) && x.Status == ProposalStatus.Pending)
+            var existingEntryProposals = await _dbContext.WorkEntryProposals
+                .Where(x => x.WorkEntryId.HasValue && entryIds.Contains(x.WorkEntryId.Value) && x.Status == ProposalStatus.Pending)
                 .ToListAsync();
 
-            var proposalDict = proposals.ToDictionary(x => x.WorkEntryId);
+            var newEntryProposals = await _dbContext.WorkEntryProposals
+                .Where(x => !x.WorkEntryId.HasValue && x.ProposedByUserId == qry.UserId && x.Status == ProposalStatus.Pending)
+                .ToListAsync();
 
-            return entries.Select(x =>
+            var existingProposalDict = existingEntryProposals.ToDictionary(x => x.WorkEntryId.Value);
+
+            // Start with existing entries
+            var result = entries.Select(x =>
             {
-                var proposal = proposalDict.GetValueOrDefault(x.Id);
+                var proposal = existingProposalDict.GetValueOrDefault(x.Id);
                 return new WorkHistoryDTO
                 {
                     Id = x.Id,
@@ -64,7 +88,25 @@ namespace Plurby.Services.Shared
                     ProposedStartTime = proposal?.ProposedStartTime,
                     ProposedEndTime = proposal?.ProposedEndTime
                 };
-            }).ToArray();
+            }).ToList();
+
+            // Add new entry proposals as virtual entries
+            var newEntryDTOs = newEntryProposals.Select(x => new WorkHistoryDTO
+            {
+                Id = Guid.Empty, // Use empty GUID to indicate it's a new entry proposal
+                StartTime = x.ProposedStartTime,
+                EndTime = x.ProposedEndTime,
+                Duration = x.ProposedEndTime.HasValue ? (x.ProposedEndTime.Value - x.ProposedStartTime) : null,
+                HasPendingProposal = false, // This IS the proposal, not a work entry with a proposal
+                ProposalId = x.Id,
+                ProposedStartTime = x.ProposedStartTime,
+                ProposedEndTime = x.ProposedEndTime,
+                IsNewEntryProposal = true // Add flag to identify new entry proposals
+            }).ToList();
+
+            // Combine and sort by start time
+            result.AddRange(newEntryDTOs);
+            return result.OrderByDescending(x => x.StartTime).ToArray();
         }
 
         public async Task<CurrentWorkStatusDTO> Query(CurrentWorkStatusQuery qry)

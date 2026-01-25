@@ -17,7 +17,7 @@ namespace Plurby.Services.Shared
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        public Guid WorkEntryId { get; set; }
+        public Guid? WorkEntryId { get; set; }
         public WorkEntry WorkEntry { get; set; }
 
         public Guid ProposedByUserId { get; set; }

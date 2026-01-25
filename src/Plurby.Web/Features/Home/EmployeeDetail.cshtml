@@ -97,12 +97,38 @@
         </div>
     </div>
 
+    <!-- Error message display -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- Tabella entries per mese -->
     @if (selectedMonthEntries.Any())
     {
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Entries lavoro - @(new DateTime(monthFilter / 100, monthFilter % 100, 1).ToString("MMMM yyyy"))</h5>
+                @if (ViewData["IsManager"] as bool? == true)
+                {
+                    <button type="button" class="btn btn-success btn-sm" onclick="openAddNewEntryModal()">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Aggiungi entry
+                    </button>
+                }
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped mb-0">
@@ -208,14 +234,8 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label for="endTime" class="form-label">Ora fine (opzionale)</label>
-                                <input type="datetime-local" class="form-control" id="endTime" name="endTime" />
-                                <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" id="clearEndTime" />
-                                    <label class="form-check-label" for="clearEndTime">
-                                        Rimuovi ora fine
-                                    </label>
-                                </div>
+                                <label for="endTime" class="form-label">Ora fine</label>
+                                <input type="datetime-local" class="form-control" id="endTime" name="endTime" required />
                             </div>
                         </div>
                     </div>
@@ -246,6 +266,46 @@
         </div>
     </div>
 </div>
+
+<!-- Modal per aggiungere nuova work entry (solo manager) -->
+@if (ViewData["IsManager"] as bool? == true)
+{
+    <div class="modal fade" id="addNewEntryModal" tabindex="-1" aria-labelledby="addNewEntryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addNewEntryModalLabel">Aggiungi Nuova Work Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addNewEntryForm" method="post" asp-action="AddNewWorkEntry">
+                    <div class="modal-body">
+                        <input type="hidden" id="addEmployeeId" name="employeeId" value="@Model.User.Id" />
+                        <input type="hidden" id="addMonthParam" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Aggiungi una nuova voce di lavoro per questo dipendente.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="addNewStartTime" class="form-label">Ora inizio</label>
+                            <input type="datetime-local" class="form-control" id="addNewStartTime" name="startTime" required />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="addNewEndTime" class="form-label">Ora fine</label>
+                            <input type="datetime-local" class="form-control" id="addNewEndTime" name="endTime" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-success">Aggiungi entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
 @section scripts {
     <script>
@@ -318,25 +378,18 @@
                     // Pre-fill with proposed values
                     const startTimeInput = document.getElementById('startTime');
                     const endTimeInput = document.getElementById('endTime');
-                    const clearEndTimeCheckbox = document.getElementById('clearEndTime');
                     
                     if (startTimeInput) {
                         startTimeInput.value = proposedStartTime || startTime;
                     }
                     
-                    if (endTimeInput && clearEndTimeCheckbox) {
+                    if (endTimeInput) {
                         if (proposedEndTime && proposedEndTime.trim() !== '') {
                             endTimeInput.value = proposedEndTime;
-                            endTimeInput.disabled = false;
-                            clearEndTimeCheckbox.checked = false;
                         } else if (endTime && endTime.trim() !== '') {
                             endTimeInput.value = endTime;
-                            endTimeInput.disabled = false;
-                            clearEndTimeCheckbox.checked = false;
                         } else {
                             endTimeInput.value = '';
-                            endTimeInput.disabled = true;
-                            clearEndTimeCheckbox.checked = true;
                         }
                     }
                 } else {
@@ -347,21 +400,16 @@
                     // Set current values as editable
                     const startTimeInput = document.getElementById('startTime');
                     const endTimeInput = document.getElementById('endTime');
-                    const clearEndTimeCheckbox = document.getElementById('clearEndTime');
                     
                     if (startTimeInput) {
                         startTimeInput.value = startTime;
                     }
                     
-                    if (endTimeInput && clearEndTimeCheckbox) {
+                    if (endTimeInput) {
                         if (endTime && endTime.trim() !== '') {
                             endTimeInput.value = endTime;
-                            endTimeInput.disabled = false;
-                            clearEndTimeCheckbox.checked = false;
                         } else {
                             endTimeInput.value = '';
-                            endTimeInput.disabled = true;
-                            clearEndTimeCheckbox.checked = true;
                         }
                     }
                 }
@@ -374,6 +422,33 @@
                 alert('Si è verificato un errore nell\'apertura della finestra di modifica. Controlla la console per i dettagli.');
             }
         }
+
+        // Define openAddNewEntryModal function for managers
+        function openAddNewEntryModal() {
+            try {
+                const modalElement = document.getElementById('addNewEntryModal');
+                if (!modalElement) {
+                    console.error('Add new entry modal element not found');
+                    return;
+                }
+
+                // Clear form
+                const startTimeInput = document.getElementById('addNewStartTime');
+                const endTimeInput = document.getElementById('addNewEndTime');
+                
+                if (startTimeInput) startTimeInput.value = '';
+                if (endTimeInput) endTimeInput.value = '';
+                
+                // Initialize and show modal
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            } catch (error) {
+                console.error('Error opening add new entry modal:', error);
+                alert('Si è verificato un errore nell\'apertura della finestra di aggiunta. Controlla la console per i dettagli.');
+            }
+        }
+
+
 
         document.addEventListener('DOMContentLoaded', function() {
             const hourlyRateInput = document.getElementById('hourlyRate');
@@ -432,30 +507,7 @@
             });
 
             // Handle clear end time checkbox
-            const clearEndTimeCheckbox = document.getElementById('clearEndTime');
-            const endTimeInput = document.getElementById('endTime');
-            
-            if (clearEndTimeCheckbox && endTimeInput) {
-                clearEndTimeCheckbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        endTimeInput.disabled = true;
-                        endTimeInput.value = '';
-                    } else {
-                        endTimeInput.disabled = false;
-                    }
-                });
-            }
 
-            // Handle form submission - ensure empty endTime is sent as empty string (will be bound as null)
-            const editWorkEntryForm = document.getElementById('editWorkEntryForm');
-            if (editWorkEntryForm) {
-                editWorkEntryForm.addEventListener('submit', function(e) {
-                    // If endTime is disabled or empty, ensure it's sent as empty string
-                    if (endTimeInput.disabled || !endTimeInput.value) {
-                        endTimeInput.value = '';
-                    }
-                });
-            }
 
             // Attach event listeners to edit buttons using data attributes
             const editButtons = document.querySelectorAll('.edit-entry-btn');
