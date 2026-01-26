@@ -27,13 +27,13 @@
     }
     else
     {
-        <div class="alert alert-info d-flex align-items-center" role="alert">
+        <div class="alert" style="background-color: #cfe2ff; color: #084298; display: flex; align-items: center;" role="alert">
             <i class="bi bi-info-circle-fill me-2"></i>
             <strong>@Model.PendingCount</strong> proposte in attesa di revisione
         </div>
 
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header" style="background-color: #2A4494; color: white;">
                 <h5 class="mb-0">
                     <i class="bi bi-clock-history"></i> Proposte in attesa
                 </h5>
@@ -91,7 +91,7 @@
                                     </form>
 
                                     <a href="@Url.Action("EmployeeDetail", "Home", new { id = proposal.ProposedByUserId })"
-                                       class="btn btn-outline-primary btn-sm">
+                                       class="btn btn-outline btn-sm" style="border-color: #2A4494; color: #2A4494;">
                                         <i class="bi bi-eye"></i> Dettagli
                                     </a>
                                 </div>
