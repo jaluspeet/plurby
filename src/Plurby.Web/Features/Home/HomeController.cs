@@ -67,8 +67,7 @@ namespace Plurby.Web.Features.Home
 
             if (user.Role == UserRole.Manager)
             {
-                SetIdentitaViewModel(user);
-                return View("ManagerIndex");
+                return await ManagerIndex();
             }
             else
             {
@@ -198,7 +197,14 @@ namespace Plurby.Web.Features.Home
             }
 
             SetIdentitaViewModel(user);
-            return View("ManagerIndex");
+
+            var pendingProposals = await _service.Query(new PendingProposalsForManagerQuery());
+            var model = new ManagerNotificationCenterViewModel
+            {
+                PendingProposals = pendingProposals
+            };
+
+            return View("ManagerIndex", model);
         }
 
         public virtual async Task<IActionResult> EmployeesManagement()
@@ -609,5 +615,11 @@ namespace Plurby.Web.Features.Home
     public class EmployeeHistoryViewModel
     {
         public IEnumerable<WorkHistoryDTO> History { get; set; }
+    }
+
+    public class ManagerNotificationCenterViewModel
+    {
+        public IEnumerable<PendingProposalDTO> PendingProposals { get; set; } = Enumerable.Empty<PendingProposalDTO>();
+        public int PendingCount => PendingProposals.Count();
     }
 }
