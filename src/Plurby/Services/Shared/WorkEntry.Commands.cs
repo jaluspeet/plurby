@@ -209,6 +209,26 @@ namespace Plurby.Services.Shared
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<PendingProposalDTO>> Query(PendingProposalsForManagerQuery qry)
+        {
+            return await _dbContext.WorkEntryProposals
+                .Where(x => x.Status == ProposalStatus.Pending)
+                .Include(x => x.ProposedByUser)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new PendingProposalDTO
+                {
+                    Id = x.Id,
+                    WorkEntryId = x.WorkEntryId,
+                    ProposedByUserId = x.ProposedByUserId,
+                    ProposedByUserName = x.ProposedByUser.FirstName + " " + x.ProposedByUser.LastName,
+                    ProposedStartTime = x.ProposedStartTime,
+                    ProposedEndTime = x.ProposedEndTime,
+                    CreatedAt = x.CreatedAt,
+                    IsNewEntryProposal = !x.WorkEntryId.HasValue
+                })
+                .ToListAsync();
+        }
+
         public async Task Handle(AcceptProposalCommand cmd)
         {
             var proposal = await _dbContext.WorkEntryProposals

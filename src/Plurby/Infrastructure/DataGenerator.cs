@@ -128,11 +128,30 @@ namespace Plurby.Infrastructure
                     if (currentDate.DayOfWeek >= DayOfWeek.Monday && currentDate.DayOfWeek <= DayOfWeek.Friday)
                     {
                         // Skip some random days to make it more realistic
-                        if (random.Next(100) > 85) // 15% chance of skipping a day
-                        {
-                            currentDate = currentDate.AddDays(1);
-                            continue;
-                        }
+                        int entriesCount = random.Next(0, 4); // Generate 0 to 3 entries per day
+
+for (int i = 0; i < entriesCount; i++) // Loop to create multiple entries per day
+{
+    // Generate work entries for weekdays (Monday-Friday)
+    if (currentDate.DayOfWeek >= DayOfWeek.Monday && currentDate.DayOfWeek <= DayOfWeek.Friday)
+    {
+        var entryStartTime = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, 
+            random.Next(8, 10), random.Next(0, 60), 0);
+            
+        var entryWorkDuration = random.Next(6, 10); // 6-10 hours of work
+        var entryEndTime = entryStartTime.AddHours(entryWorkDuration);
+        
+        workEntries.Add(new WorkEntry
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            StartTime = entryStartTime,
+            EndTime = entryEndTime
+        });
+    }
+}
+
+currentDate = currentDate.AddDays(1);
 
                         var startTime = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, 
                             random.Next(8, 10), random.Next(0, 60), 0);

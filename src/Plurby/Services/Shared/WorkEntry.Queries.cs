@@ -29,6 +29,23 @@ namespace Plurby.Services.Shared
         public Guid UserId { get; set; }
     }
 
+    public class PendingProposalsForManagerQuery
+    {
+        // No parameters needed - gets all pending proposals for manager to review
+    }
+
+    public class PendingProposalDTO
+    {
+        public Guid Id { get; set; }
+        public Guid? WorkEntryId { get; set; }
+        public Guid ProposedByUserId { get; set; }
+        public string ProposedByUserName { get; set; }
+        public DateTime ProposedStartTime { get; set; }
+        public DateTime? ProposedEndTime { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsNewEntryProposal { get; set; }
+    }
+
     public class WorkEntryProposalDTO
     {
         public Guid Id { get; set; }
