@@ -4,16 +4,14 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestione Account</h1>
-
-
-         <button type="button" class="btn btn-primary rounded-pill d-flex align-items-center"
-                    style="background-color:#2A4494; border:none; font-weight:bold;"
-                    data-bs-toggle="modal" data-bs-target="#createUserModal">
-                <i class="bi bi-person-plus me-2"></i> Crea Nuovo Account
-            </button>
-    </div>
+     <div class="d-flex justify-content-between align-items-center mb-4">
+         <h1 class="mb-0">Gestione Account</h1>
+         <button type="button" class="btn btn-primary rounded-pill d-flex align-items-center py-2 px-3"
+                 style="background-color:#2A4494; border:none; font-weight:bold;"
+                 data-bs-toggle="modal" data-bs-target="#createUserModal">
+             <i class="bi bi-person-plus me-2"></i> Crea Nuovo Account
+         </button>
+     </div>
     
     <div class="table-responsive">
         <table class="table table-striped table-hover">
@@ -32,21 +30,19 @@
     </div>
 
     <!-- PAGINAZIONE -->
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <div id="pageCounter" class="fw-bold"></div>
-
-        <div>
-            <button id="prevBtn" class="btn btn-link text-decoration-underline"
-                    style="color:#FF8D28; font-weight:bold;">
-                <i class="bi bi-arrow-left"></i> Indietro
-            </button>
-
-            <button id="nextBtn" class="btn"
-                    style="background-color:#0B6E4F; color:white; font-weight:bold;">
-                Avanti <i class="bi bi-arrow-right"></i>
-            </button>
-        </div>
-    </div>
+     <div class="d-flex justify-content-between align-items-center mt-4">
+         <div id="pageCounter" class="fw-bold"></div>
+         <div class="d-flex gap-2">
+             <button id="prevBtn" class="btn btn-link text-decoration-underline d-flex align-items-center py-2 px-3"
+                     style="color:#FF8D28; font-weight:bold;">
+                 <i class="bi bi-arrow-left me-2"></i> Indietro
+             </button>
+             <button id="nextBtn" class="btn d-flex align-items-center py-2 px-3"
+                     style="background-color:#0B6E4F; color:white; font-weight:bold;">
+                 Avanti <i class="bi bi-arrow-right ms-2"></i>
+             </button>
+         </div>
+     </div>
 </div>
 
 <style>

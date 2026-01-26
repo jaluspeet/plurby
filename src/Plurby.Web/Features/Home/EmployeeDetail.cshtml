@@ -41,10 +41,11 @@
 
             <!-- Selettore mese moderno con icona e freccia -->
             <div class="btn-group">
-                <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
-                        id="prevMonth" title="Mese precedente" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
-                    <i class="bi bi-arrow-left-circle"></i>
-                </button>
+                     <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
+                             id="prevMonth" title="Mese precedente" aria-label="Mese precedente" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
+                         <i class="bi bi-arrow-left-circle"></i>
+                         <span class="visually-hidden">Mese precedente</span>
+                     </button>
 
                 <button type="button" class="btn text-white dropdown-toggle d-flex align-items-center justify-content-between" 
                         data-bs-toggle="dropdown" id="currentMonthBtn" style="background-color:#2A4494; font-size:1rem; padding:0.5rem 1rem; min-width:220px;">
@@ -65,10 +66,11 @@
                     }
                 </ul>
 
-                <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
-                        id="nextMonth" title="Mese successivo" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
-                    <i class="bi bi-arrow-right-circle"></i>
-                </button>
+                     <button type="button" class="btn text-white d-flex align-items-center justify-content-center" 
+                             id="nextMonth" title="Mese successivo" aria-label="Mese successivo" style="background-color:#2A4494; font-size:1.5rem; padding:0.5rem 1rem;">
+                         <i class="bi bi-arrow-right-circle"></i>
+                         <span class="visually-hidden">Mese successivo</span>
+                     </button>
             </div>
         </div>
 
@@ -163,44 +165,71 @@
                                     <td>@TimeFormatter.FormatItalian(entry.Duration)</td>
                                     @if (ViewData["IsManager"] as bool? == true)
                                     {
-                                        <td>
+                                         <td class="d-flex align-items-center justify-content-start">
                                             @if (entry.IsNewEntryProposal)
                                             {
-                                                <span class="badge bg-info me-2">
-                                                    <i class="bi bi-plus-circle"></i> Proposta nuova
-                                                </span>
-                                                <form method="post" asp-action="AcceptProposal" style="display: inline;">
-                                                    <input type="hidden" name="proposalId" value="@entry.ProposalId" />
-                                                    <input type="hidden" name="employeeId" value="@Model.User.Id" />
-                                                    <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
-                                                    <button type="submit" class="btn btn-sm btn-success me-2" title="Accetta proposta">
-                                                        <i class="bi bi-check-circle"></i>
-                                                    </button>
-                                                </form>
-                                                <form method="post" asp-action="RejectProposal" style="display: inline;">
-                                                    <input type="hidden" name="proposalId" value="@entry.ProposalId" />
-                                                    <input type="hidden" name="employeeId" value="@Model.User.Id" />
-                                                    <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Rifiuta proposta">
-                                                        <i class="bi bi-x-circle"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                            else if (entry.HasPendingProposal)
-                                            {
-                                                <span class="badge bg-warning text-dark me-2">
-                                                    <i class="bi bi-exclamation-triangle"></i> Proposta
-                                                </span>
+                                             <span class="badge bg-info me-2">
+                                                 <i class="bi bi-plus-circle"></i> Nuova
+                                             </span>
+                                             <form method="post" asp-action="AcceptProposal" style="display: inline;">
+                                                 <input type="hidden" name="proposalId" value="@entry.ProposalId" />
+                                                 <input type="hidden" name="employeeId" value="@Model.User.Id" />
+                                                 <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                                                 <button type="submit" class="btn btn-sm btn-success me-1" title="Accetta proposta" aria-label="Accetta proposta">
+                                                     <i class="bi bi-check-circle"></i> Accetta
+                                                 </button>
+                                             </form>
+                                             <form method="post" asp-action="RejectProposal" style="display: inline;">
+                                                 <input type="hidden" name="proposalId" value="@entry.ProposalId" />
+                                                 <input type="hidden" name="employeeId" value="@Model.User.Id" />
+                                                 <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                                                 <button type="submit" class="btn btn-sm btn-danger me-1" title="Rifiuta proposta" aria-label="Rifiuta proposta">
+                                                     <i class="bi bi-x-circle"></i> Rifiuta
+                                                 </button>
+                                             </form>
                                                 <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
                                                         data-entry-id="@entry.Id"
                                                         data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
                                                         data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
                                                         data-employee-id="@Model.User.Id"
-                                                        data-has-proposal="@(entry.HasPendingProposal ? "true" : "false")"
+                                                        data-has-proposal="@(entry.HasPendingProposal || entry.IsNewEntryProposal ? "true" : "false")"
                                                         data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
                                                         data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
                                                         data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
-                                                    <i class="bi bi-pencil"></i> Modifica
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            }
+                                            else if (entry.HasPendingProposal)
+                                            {
+                                             <span class="badge bg-warning text-dark me-2">
+                                                 <i class="bi bi-exclamation-triangle"></i> Proposta
+                                             </span>
+                                             <form method="post" asp-action="AcceptProposal" style="display: inline;">
+                                                 <input type="hidden" name="proposalId" value="@entry.ProposalId" />
+                                                 <input type="hidden" name="employeeId" value="@Model.User.Id" />
+                                                 <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                                                 <button type="submit" class="btn btn-sm btn-success me-1" title="Accetta proposta" aria-label="Accetta proposta">
+                                                     <i class="bi bi-check-circle"></i> Accetta
+                                                 </button>
+                                             </form>
+                                             <form method="post" asp-action="RejectProposal" style="display: inline;">
+                                                 <input type="hidden" name="proposalId" value="@entry.ProposalId" />
+                                                 <input type="hidden" name="employeeId" value="@Model.User.Id" />
+                                                 <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                                                 <button type="submit" class="btn btn-sm btn-danger me-1" title="Rifiuta proposta" aria-label="Rifiuta proposta">
+                                                     <i class="bi bi-x-circle"></i> Rifiuta
+                                                 </button>
+                                             </form>
+                                                <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                        data-entry-id="@entry.Id"
+                                                        data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
+                                                        data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                        data-employee-id="@Model.User.Id"
+                                                        data-has-proposal="@(entry.HasPendingProposal || entry.IsNewEntryProposal ? "true" : "false")"
+                                                        data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
+                                                        data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                        data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
+                                                    <i class="bi bi-pencil"></i>
                                                 </button>
                                             }
                                             else
