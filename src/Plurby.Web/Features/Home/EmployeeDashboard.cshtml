@@ -42,7 +42,12 @@
     @if (Model.TodayEntries.Any())
     {
         <div class="mb-4">
-            <h4 class="mb-3">Lavoro di oggi</h4>
+                <h4 class="mb-1">Lavoro di oggi</h4>
+        <p class="text-muted mb-3">
+            @DateTime.Now.ToString("dddd dd MMMM yyyy", 
+                new System.Globalization.CultureInfo("it-IT"))
+        </p>
+
             <div class="card">
                 <div class="card-body p-0">
                     <table class="table table-striped mb-0">
