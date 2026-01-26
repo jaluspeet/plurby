@@ -132,7 +132,7 @@
                     <h6 class="mb-0">
                         <i class="bi bi-calendar3 me-2"></i>
                         @dayGroup.Key.ToString("dddd d MMMM yyyy")
-                        <span class="badge bg-primary ms-2">@TimeFormatter.FormatItalian(TimeSpan.FromHours(dayTotalHours))</span>
+                        <span class="badge" style="background-color: #2A4494; color: white;">@TimeFormatter.FormatItalian(TimeSpan.FromHours(dayTotalHours))</span>
                     </h6>
                 </div>
                 <div class="card-body p-0">
@@ -187,7 +187,8 @@
                                                      <i class="bi bi-x-circle"></i> Rifiuta
                                                  </button>
                                              </form>
-                                                <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                <button type="button" class="btn btn-sm  edit-entry-btn" 
+                                                        style="background-color: #2A4494; color: white;"
                                                         data-entry-id="@entry.Id"
                                                         data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
                                                         data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
@@ -220,7 +221,9 @@
                                                      <i class="bi bi-x-circle"></i> Rifiuta
                                                  </button>
                                              </form>
-                                                <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                <button type="button" class="btn btn-sm edit-entry-btn" 
+                                                    style="background-color: #2A4494; color: white;"
+                                        
                                                         data-entry-id="@entry.Id"
                                                         data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
                                                         data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
@@ -234,7 +237,8 @@
                                             }
                                             else
                                             {
-                                                <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                <button type="button" class="btn btn-sm edit-entry-btn"  
+                                                        style="background-color: #2A4494; color: white;"
                                                         data-entry-id="@entry.Id"
                                                         data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
                                                         data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
@@ -337,7 +341,7 @@
                             </button>
                         </form>
                     </div>
-                    <button type="submit" class="btn btn-primary">Salva modifiche</button>
+                    <button type="submit" class="btn" style="background-color: #2A4494; color: white;">Salva modifiche</button>
                 </div>
             </form>
         </div>
