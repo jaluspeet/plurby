@@ -298,6 +298,20 @@ namespace Plurby.Web.Features.Home
                 return Forbid();
             }
 
+            // Before updating the work entry, check if there's a pending proposal for it
+            var pendingProposal = await _service.Query(new WorkEntryProposalsQuery { UserId = employeeId })
+                .ContinueWith(t => t.Result.FirstOrDefault(p => p.WorkEntryId == workEntryId && p.Status == ProposalStatus.Pending));
+
+            if (pendingProposal != null)
+            {
+                // If a pending proposal exists, accept it implicitly
+                await _service.Handle(new AcceptProposalCommand
+                {
+                    ProposalId = pendingProposal.Id,
+                    ProcessedByUserId = currentUser.Id
+                });
+            }
+
             await _service.Handle(new UpdateWorkEntryCommand
             {
                 WorkEntryId = workEntryId,

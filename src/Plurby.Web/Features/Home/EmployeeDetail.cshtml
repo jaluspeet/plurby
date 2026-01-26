@@ -149,30 +149,74 @@
                         <tbody>
                             @foreach (var entry in dayGroup.OrderByDescending(e => e.StartTime))
                             {
-                                <tr class="@(entry.HasPendingProposal ? "table-warning" : "")">
-                                    <td>@entry.StartTime.ToLocalTime().ToString("HH:mm")</td>
+                                <tr class="@(entry.HasPendingProposal || entry.IsNewEntryProposal ? "table-warning" : "")">
+                                    <td>
+                                        @entry.StartTime.ToLocalTime().ToString("HH:mm")
+                                        @if (entry.IsNewEntryProposal)
+                                        {
+                                            <span class="badge bg-info ms-2">
+                                                <i class="bi bi-plus-circle"></i> Nuova
+                                            </span>
+                                        }
+                                    </td>
                                     <td>@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("HH:mm") : "-")</td>
                                     <td>@TimeFormatter.FormatItalian(entry.Duration)</td>
                                     @if (ViewData["IsManager"] as bool? == true)
                                     {
                                         <td>
-                                            @if (entry.HasPendingProposal)
+                                            @if (entry.IsNewEntryProposal)
+                                            {
+                                                <span class="badge bg-info me-2">
+                                                    <i class="bi bi-plus-circle"></i> Proposta nuova
+                                                </span>
+                                                <form method="post" asp-action="AcceptProposal" style="display: inline;">
+                                                    <input type="hidden" name="proposalId" value="@entry.ProposalId" />
+                                                    <input type="hidden" name="employeeId" value="@Model.User.Id" />
+                                                    <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                                                    <button type="submit" class="btn btn-sm btn-success me-2" title="Accetta proposta">
+                                                        <i class="bi bi-check-circle"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="post" asp-action="RejectProposal" style="display: inline;">
+                                                    <input type="hidden" name="proposalId" value="@entry.ProposalId" />
+                                                    <input type="hidden" name="employeeId" value="@Model.User.Id" />
+                                                    <input type="hidden" name="month" value="@(Context.Request.Query["month"].FirstOrDefault())" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Rifiuta proposta">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (entry.HasPendingProposal)
                                             {
                                                 <span class="badge bg-warning text-dark me-2">
                                                     <i class="bi bi-exclamation-triangle"></i> Proposta
                                                 </span>
+                                                <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                        data-entry-id="@entry.Id"
+                                                        data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
+                                                        data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                        data-employee-id="@Model.User.Id"
+                                                        data-has-proposal="@(entry.HasPendingProposal ? "true" : "false")"
+                                                        data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
+                                                        data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                        data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
+                                                    <i class="bi bi-pencil"></i> Modifica
+                                                </button>
                                             }
-                                            <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
-                                                    data-entry-id="@entry.Id"
-                                                    data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
-                                                    data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
-                                                    data-employee-id="@Model.User.Id"
-                                                    data-has-proposal="@(entry.HasPendingProposal ? "true" : "false")"
-                                                    data-proposal-id="@(entry.ProposalId?.ToString() ?? "")"
-                                                    data-proposed-start-time="@(entry.ProposedStartTime.HasValue ? entry.ProposedStartTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
-                                                    data-proposed-end-time="@(entry.ProposedEndTime.HasValue ? entry.ProposedEndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")">
-                                                <i class="bi bi-pencil"></i> Modifica
-                                            </button>
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-primary edit-entry-btn" 
+                                                        data-entry-id="@entry.Id"
+                                                        data-start-time="@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")"
+                                                        data-end-time="@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")"
+                                                        data-employee-id="@Model.User.Id"
+                                                        data-has-proposal="false"
+                                                        data-proposal-id=""
+                                                        data-proposed-start-time=""
+                                                        data-proposed-end-time="">
+                                                    <i class="bi bi-pencil"></i> Modifica
+                                                </button>
+                                            }
                                         </td>
                                     }
                                 </tr>

@@ -83,10 +83,10 @@ namespace Plurby.Services.Shared
                     StartTime = x.StartTime,
                     EndTime = x.EndTime,
                     Duration = x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime) : null,
-                    HasPendingProposal = proposal != null,
+                    HasPendingProposal = proposal != null && proposal.Status == ProposalStatus.Pending,
                     ProposalId = proposal?.Id,
-                    ProposedStartTime = proposal?.ProposedStartTime,
-                    ProposedEndTime = proposal?.ProposedEndTime
+                    ProposedStartTime = proposal?.Status == ProposalStatus.Pending ? proposal.ProposedStartTime : null,
+                    ProposedEndTime = proposal?.Status == ProposalStatus.Pending ? proposal.ProposedEndTime : null
                 };
             }).ToList();
 
