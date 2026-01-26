@@ -8,7 +8,7 @@
         public string GetRowClass(WorkHistoryDTO entry)
         {
             if (entry.HasPendingProposal) return "table-warning";
-            if (entry.IsNewEntryProposal) return "table-info";
+            if (entry.IsNewEntryProposal) return "table-warning";
             return "";
         }
     }
@@ -170,7 +170,7 @@
                                         @if (entry.IsNewEntryProposal)
                                         {
                                             <span class="badge bg-info ms-2">
-                                                <i class="bi bi-plus-circle"></i> Nuova
+                                                <i class="bi"></i> Nuova
                                             </span>
                                         }
                                     </td>
@@ -182,7 +182,7 @@
                                             @if (entry.IsNewEntryProposal)
                                             {
                                                
-                                                 <button type="button" class="btn btn-sm btn-warning me-1" onclick="openEditNewProposalModal('@entry.ProposalId', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')" aria-label="Modifica proposta">
+                                                 <button type="button" class="btn btn-sm" style="background-color: #2A4494; color: white; margin-right: 0.25rem;" onclick="openEditNewProposalModal('@entry.ProposalId', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')" aria-label="Modifica proposta">
                                                      <i class="bi bi-pencil"></i> Modifica
                                                  </button>
 
