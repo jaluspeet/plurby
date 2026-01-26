@@ -145,7 +145,7 @@
                     <h6 class="mb-0">
                         <i class="bi bi-calendar3 me-2"></i>
                         @dayGroup.Key.ToString("dddd d MMMM yyyy")
-                        <span class="badge bg-primary ms-2">@TimeFormatter.FormatItalian(TimeSpan.FromHours(dayTotalHours))</span>
+                        <span class="badge" style="background-color: #2A4494; color: white;" class="ms-2">@TimeFormatter.FormatItalian(TimeSpan.FromHours(dayTotalHours))</span>
                     </h6>
                 </div>
                 <div class="card-body p-0">
@@ -181,25 +181,29 @@
                                          <td class="d-flex align-items-center justify-content-start">
                                             @if (entry.IsNewEntryProposal)
                                             {
-                                                <span class="badge bg-warning text-dark me-2">
-                                                    <i class="bi bi-clock-history"></i> In attesa
-                                                </span>
+                                               
                                                  <button type="button" class="btn btn-sm btn-warning me-1" onclick="openEditNewProposalModal('@entry.ProposalId', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@(entry.EndTime.HasValue ? entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")')" aria-label="Modifica proposta">
                                                      <i class="bi bi-pencil"></i> Modifica
                                                  </button>
+
+                                                  <span class="mx-2 badge bg-warning text-dark me-2">
+                                                    <i class="bi bi-clock-history"></i> Proposta in attesa
+                                                </span>
                                             }
                                             else if (entry.HasPendingProposal)
                                             {
-                                                <span class="badge bg-warning text-dark me-2">
-                                                    <i class="bi bi-clock-history"></i> In attesa
-                                                </span>
-                                                 <button type="button" class="btn btn-sm btn-info me-1" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")')" aria-label="Proponi modifica">
+                                               
+                                                 <button type="button" class="btn btn-sm btn" style="background-color: #2A4494; color: white;" me-1" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")')" aria-label="Proponi modifica">
                                                      <i class="bi bi-pencil"></i> Proponi
                                                  </button>
+
+                                                  <span class="mx-2 badge bg-warning text-dark me-2">
+                                                    <i class="bi bi-clock-history"></i> Proposta in attesa
+                                                </span>
                                             }
                                             else if (entry.EndTime.HasValue)
                                             {
-                                                 <button type="button" class="btn btn-sm btn-info me-1" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")')" aria-label="Proponi modifica">
+                                                 <button type="button" class="btn btn-sm btn" style="background-color: #2A4494; color: white;" me-1" onclick="openProposeModal('@entry.Id', '@entry.StartTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@entry.EndTime.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")')" aria-label="Proponi modifica">
                                                      <i class="bi bi-pencil"></i> Proponi
                                                  </button>
                                             }
@@ -266,7 +270,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                        <button type="submit" class="btn btn-primary" :disabled="!isValid">Invia</button>
+                        <button type="submit" class="btn" style="background-color: #2A4494; color: white;" :disabled="!isValid">Invia</button>
                     </div>
                 </form>
             </div>
